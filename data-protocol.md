@@ -457,7 +457,7 @@ Value | Description
 0x02  | User Clears Alarm
 0x03  | LGM Manual Resume
 0x04  | LGM Auto Resume Due Max Suspended Time
-0x05  | LGM Auto Resume Du PSG And SG
+0x05  | LGM Auto Resume Due PSG And SG
 0x06  | LGM Manual Resume Via Disable
 
 

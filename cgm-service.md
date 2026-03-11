@@ -6,6 +6,19 @@
 	* SAKE-encrypted in _both_ directions
 
 
+## CGM Feature
+
+This characteristic can be read to retrieve pump features regarding the CGM. Most notably the _E2E-CRC Supported_ bit. If it is set, the optional _E2E-CRC_ field in the other characteristics of this service must be included and populated with a CRC over the data. See [[CGMS, sec. 3.11]](#ref-cgms) for the specifics.
+
+The characteristic is based on the standard defined in [[CGMS]](#ref-cgms) and [[GSS, sec. 3.42]](#ref-gss). There are no additions or changes to the flags that make up the actual feature list, so we will not reproduce them here. But Medtronic's version leaves out the _CGM Type-Sample Location_ field as well as the mandatory _E2E-CRC_ field, i.e. the structure of this characteristic looks like this:
+
+Field Name                   |  Data Type   | Size (octets) | Unit
+-----------------------------|--------------|---------------|------
+CGM Feature                  | 24 bit       | 3             | None
+
+Note that the data returned by the pump in this characteristic is _not_ SAKE-encrypted.
+
+
 ## CGM Specific Ops Control Point (SOCP)
 
 A command (identified by its _opcode_) is sent by writing to this characteristic. The pump responds by sending an indication for the same characteristic.

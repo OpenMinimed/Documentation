@@ -21,6 +21,15 @@ CGM Feature                  | 24 bit       | 3             | None
 Note that the data returned by the pump in this characteristic is _not_ SAKE-encrypted.
 
 
+## CGM Measurement
+
+Values from a connected CGM sensor are reported in this characteristic. Also included are optional information such as trend information or warnings regarding the glucose level.
+
+The implementation follows the standard defined in [[CGMS]](#ref-cgms) and [[GSS, sec. 3.43]](#ref-gss) without any changes or additions, so we will not reproduce that information here.
+
+The data returned by the pump in this characteristic is SAKE-encrypted.
+
+
 ## CGM Specific Ops Control Point (SOCP)
 
 A command (identified by its _opcode_) is sent by writing to this characteristic. The pump responds by sending an indication for the same characteristic.

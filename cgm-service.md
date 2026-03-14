@@ -5,7 +5,9 @@ This service provides access to data from a CGM sensor (such as the Guardian 4) 
 
 ## CGM Feature
 
-This characteristic can be read to retrieve pump features regarding the CGM. Most notably the _E2E-CRC Supported_ bit. If it is set, the optional _E2E-CRC_ field in the other characteristics of this service must be included and populated with a CRC over the data. See [[CGMS, sec. 3.11]](#ref-cgms) for the specifics.
+This characteristic can be read to retrieve pump features regarding the CGM. Most notably the _E2E-CRC Supported_ bit. If it is set, the optional _E2E-CRC_ field in the other characteristics of this service must be included and populated with a CRC over the data. See [[CGMS, sec. 3.11]](#ref-cgms) for the specifics. Note that this goes both ways: The CRC must be included in all our requests, and the pump will also add it in its responses.
+
+The _E2E-CRC Supported_ bit seems to be always set for a 780G pump, which is why we explicitly mentiond it here.
 
 The characteristic is based on the standard defined in [[CGMS]](#ref-cgms) and [[GSS, sec. 3.42]](#ref-gss). There are no additions or changes to the flags that make up the actual feature list, so we will not reproduce them here. But Medtronic's version leaves out the _CGM Type-Sample Location_ field as well as the mandatory _E2E-CRC_ field, i.e. the structure of this characteristic looks like this:
 
@@ -14,6 +16,8 @@ Field Name                   |  Data Type   | Size (octets) | Unit
 CGM Feature                  | 24 bit       | 3             | None
 
 Note that the data returned by the pump in this characteristic is _not_ SAKE-encrypted.
+
+The spec requires the _CGM Feature_ to be static during a connection. So reading it _once_ is sufficient. The features will not change in the middle of a connection.
 
 
 ## CGM Measurement
@@ -28,8 +32,6 @@ The data returned by the pump in this characteristic is SAKE-encrypted.
 ## CGM Specific Ops Control Point (SOCP)
 
 A command (identified by its _opcode_) is sent by writing to this characteristic. The pump responds by sending an indication for the same characteristic.
-
-If the _E2E-CRC Supported_ bit is set in the _CGM Features_ characteristic (which always seems to be the case for a 780G pump), the _E2E-CRC_ field must be included in all requests. The pump will also add this field in its responses.
 
 The written data must be SAKE-encrypted. The returned data is also SAKE-encrypted.
 

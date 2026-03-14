@@ -11,6 +11,7 @@ This is a collection of mostly reverse-engineering notes that will (hopefully) e
 ## Bluetooth
 
 * [Bluetooth communication](bluetooth.md)
+* [Data types and notational conventions](gatt-data-conventions.md)
 * [App GATT services](app-services.md)
 * [Pump GATT services](pump-services.md)
     * [CGM service](cgm-service.md)

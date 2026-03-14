@@ -15,6 +15,7 @@ This is a collection of mostly reverse-engineering notes that will (hopefully) e
 * [App GATT services](app-services.md)
 * [Pump GATT services](pump-services.md)
     * [CGM service](cgm-service.md)
+    * [IDD service](idd-service.md)
     * [NOS service](nos-service.md)
     * [Data protocol](data-protocol.md)
 

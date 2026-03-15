@@ -96,7 +96,411 @@ Bit   | Definition                               | Description
 33    | Early Sensor Calibration Time Changed    | custom extension
 
 
+## IDD Command Control Point & IDD Command Data
+
+The spec for the _Insulin Delivery Service_ defines the characteristic _IDD Command Control Point_ for "adapting therapy parameters to enable the remote operation of the insulin therapy as well as the remote operation for device maintenance" [[IDS]](#ref-ids). Together with a second characteristic _IDD Command Data_ it implements a simple "command in, data out" interface:
+
+* _IDD Command Control Point_
+	* app sends command to the pump
+	* pump sends back final "command execution finished" (indications)
+	* SAKE-encrypted
+* _IDD Command Data_
+	* pump sends back data in response (notifications)
+	* SAKE-encrypted
+
+The app (the client) writes commands to the _Command Control Point_ and receives a response from the pump (the server) either via _Command Control Point_ or _Command Data_. Commands include things like "set a bolus" or "get the basal rate profile template" [[IDS, sec. 4.6.1]](#ref-ids).
+
+The type of command is encoded in its _opcode_. The client may send multiple commands without waiting for a response. Responses from the server also include an opcode which references the command's opcode. This allows the client to map responses to the original command.
+
+The spec defines the following behavior: If the server wants/needs to respond to a command with more than one record (for example, lengthy basal rate profile templates), it shall use multiple _notifications_ of the _Command Data_ to do so (one per record). It shall then _indicate_ the _Command Control Point_ to confirm the end of the command's execution. Therefore, the app shall configure the _Command Data_ characteristic for notifications and the _Command Control Point_ characteristic for indications before sending its first command. Since an _indication_ in Bluetooth LE requires an acknowledgement from the client, the pump will know that the app received that final confirmation of execution.
+
+In practice we observe a 780G pump sending notifications of the Command Data even for single-record responses that could have been sent through the _Command Control Point_. Medtronic probably chose to do so because they _always_ wanted to indicate the response code (either success or one of various error codes), which they could not simply send along with other data in the response. There is only _one_ opcode allowed per response package, and "Response Code" is one of them.
+
+### Opcodes
+
+The spec defines a large table of opcodes encoding different commands [[IDS, table 4.3.6]](#ref-ids). Some portions of the value range are marked as "prohibited". Medtronic uses on of these for custom opcodes. We only list the selection of opcodes defined in the MiniMed Mobile app. The pump may actually support other commands from the spec, too.
+
+Value  | Definition                        | Description
+-------|-----------------------------------|-------------
+0x0f55 | Response Code                     |
+0x114b | Set Bolus                         |
+0x1177 | Set Bolus Response                |
+0x1178 | Cancel Bolus                      |
+0x1187 | Cancel Bolus Response             |
+0x147d | Get Max Bolus Amount              |
+0x1482 | Get Max Bolus Amount Response     |
+0x148e | Get High/Low SG Settings          | Medtronic custom
+0x148f | Get High/Low SG Settings Response | Medtronic custom
+
+The opcodes that contain "response" in the name are used only in responses, the other ones only when sending commands.
+
+### Format of _Response Code_ response
+
+This is a special response. The pump sends it as indication on the _IDD Command Control Point_ characteristic to mark the end of command execution (i.e. expect no more responses on the _IDD Command Data_ characteristic) and also to provide a final return code in the _Response Code Value_ field. The original opcode that started the command is included in the _Request Opcode_ field.
+
+Field Name                  | Data Type    | Size (octets) | Unit
+----------------------------|--------------|---------------|------
+Response Opcode             | Value 0x0f55 | 2             | None
+Request Opcode              | Enum of u16  | 2             | None
+Response Code Value         | Enum of u8   | 1             | None
+E2E-Counter                 | u8           | 0 or 1        | N/A
+E2E-CRC                     | u16          | 0 or 2        | N/A
+
+The following values are defined for the _Response Code Value_ field:
+
+Value | Definition
+------|------------
+0x0f  | Success
+0x70  | Opcode not supported
+0x71  | Invalid Operand
+0x72  | Procedure not completed
+0x73  | Parameter out of range
+0x74  | Procedure not applicable
+0x75  | Plausability check failed
+0x76  | Maximum bolus number reached
+
+### Format of custom _Get High/Low SG Settings_ command and response
+
+The command is sent by writing to the _IDD Command Control Point_ characteristic. The pump responds by sending a notification for the _IDD Command Data_ characteristic.
+
+#### Command structure
+
+Field Name    | Data Type    | Size (octets) | Unit
+--------------|--------------|---------------|------
+Opcode        | Value 0x148e | 2             | None
+Settings Type | Enum of u8   | 1             | None
+E2E-Counter   | u8           | 0 or 1        | N/A
+E2E-CRC       | u16          | 0 or 2        | N/A
+
+The following values are defined for the _Settings Type_ field:
+
+Value | Definition
+------|------------
+0x00  | Low
+0x01  | High
+
+#### Response structure
+
+Field Name                  | Data Type    | Size (octets) | Unit
+----------------------------|--------------|---------------|------
+Response Opcode             | Value 0x148f | 2             | None
+Flags                       | 8 bit        | 1             | None
+Settings Type               | Enum of u8   | 1             | None
+1st Time Block Number Index | u8           | 1             | None
+1st Duration                | u16          | 2             | minutes
+1st SG Limit                | f16          | 2             | see note
+2nd Duration                | u16          | 2             | minutes
+2nd SG Limit                | f16          | 2             | see note
+3rd Duration                | u16          | 2             | minutes
+3rd SG Limit                | f16          | 2             | see note
+E2E-Counter                 | u8           | 0 or 1        | N/A
+E2E-CRC                     | u16          | 0 or 2        | N/A
+
+NOTE: The unit of the _SG Limit_ fields probably depends on the value of the bit _Glucose Unit mg/dL Used_ in the data read from the _IDD Feature_ characteristic. So it is likely mg/dL if the flag is set, and mmol/L otherwise.
+
+Bits in the _Flags_ field are defined as follows:
+
+Bit | Definition             | Description
+----|------------------------|-------------
+0   | 2nd Time Block Present | If this bit is set, fields _2nd Duration_ and _2nd SG Limit_ are present
+1   | 3rd Time Block Present | If this bit is set, fields _3rd Duration_ and _3rd SG Limit_ are present
+
+
+### Example capture
+
+Following is an annotated capture of the MiniMed Mobile app requesting the high/low sensor glucose settings from a 780G pump. This happens in two parts: First, the app requests the _High_ settings through Medtronic's custom command. After this command has been completed by the pump, the app requests the _Low_ settings using the same command.
+
+1. App writes command _Get High/Low SG Settings_ to the _IDD Command Control Point_:
+
+		8e14 01
+		8e14 ..  Opcode:  Get High/Low SG Settings
+		.... 01  Operand: High
+
+2. Pump responds with notification for _IDD Command Data_:
+
+		8f14 03 01 00 e001 1801 0c03 0000 b400 1801
+		8f14 .. .. .. .... .... .... .... .... ....  Response Opcode: Get High/Low SG Settings Response
+		.... 03 .. .. .... .... .... .... .... ....  Operand: 2nd Time Block Present (0x1) | 3rd Time Block Present (0x2)
+		.... .. 01 .. .... .... .... .... .... ....  Operand: High
+		.... .. .. 00 .... .... .... .... .... ....  Operand: 1st Time Block Number Index: 0
+		.... .. .. .. e001 .... .... .... .... ....  Operand: 1st Duration: 480 min
+		.... .. .. .. .... 1801 .... .... .... ....  Operand: 1st SG Limit: 280.0 mg/dL
+		.... .. .. .. .... .... 0c03 .... .... ....  Operand: 2nd Duration: 780 min
+		.... .. .. .. .... .... .... 0000 .... ....  Operand: 2nd SG Limit: 0.0 mg/dL
+		.... .. .. .. .... .... .... .... b400 ....  Operand: 3rd Duration: 180 min
+		.... .. .. .. .... .... .... .... .... 1801  Operand: 3rd SG Limit: 280.0 mg/dL
+
+	If the flag for 2nd and 3rd time block are _not_ set, the corresponding block is not part of the packet, i.e. the packet shown above would be shorter by 2 or 4 bytes, respectively.
+
+3. Pump finishes with indication for _IDD Command Control Point_:
+
+		550f 8e14 0f
+		550f .... ..  Opcode:  Response Code
+		.... 8e14 ..  Operand: Request Opcode: Get High/Low SG Settings
+		.... .... 0f  Operand: Response Code Value: Success
+
+4. App writes command _Get High/Low SG Settings_ to the _IDD Command Control Point_:
+
+		8e14 00
+		8e14 ..  Opcode:  Get High/Low SG Settings
+		.... 00  Operand: Low
+
+5. Pump responds with notification for _IDD Command Data_:
+
+		8f14 03 00 00 c201 5000 ee02 4600 f000 5000
+		8f14 .. .. .. .... .... .... .... .... ....  Response Opcode: Get High/Low SG Settings Response
+		.... 03 .. .. .... .... .... .... .... ....  Operand: 2nd Time Block Present (0x1) | 3rd Time Block Present (0x2)
+		.... .. 00 .. .... .... .... .... .... ....  Operand: Low
+		.... .. .. 00 .... .... .... .... .... ....  Operand: 1st Time Block Number Index: 0
+		.... .. .. .. c201 .... .... .... .... ....  Operand: 1st Duration: 450 min
+		.... .. .. .. .... 5000 .... .... .... ....  Operand: 2nd SD Limit: 80.0 mg/dL
+		.... .. .. .. .... .... ee02 .... .... ....  Operand: 2nd Duration: 750 min
+		.... .. .. .. .... .... .... 4600 .... ....  Operand: 3rd SD Limit: 70.0 mg/dL
+		.... .. .. .. .... .... .... .... f000 ....  Operand: 3rd Duration: 240 min
+		.... .. .. .. .... .... .... .... .... 5000  Operand: 3rd SD Limit: 80.0 mg/dL
+
+6.  Pump finishes with indication for _Command Control Point_:
+
+		550f 8e14 0f
+		550f .... ..  Opcode:  Response Code
+		.... 8e14 ..  Operand: Request Opcode: Get High/Low SG Settings
+		.... .... 0f  Operand: Response Code Value: Success
+
+
+## Record Access Control Point & IDD History Data
+
+Similar to the [_IDD Command_ interface](#idd-command-control-point--idd-command-data), Medtronic's _Insulin Delivery Service_ defines two characteristics _Record Access Control Point_ (_RACP_) and _IDD History Data_ that also appear in the spec [[IDS]](#ref-ids) for this service (only difference being a dedicated _IDD RACP_ in the spec). They provide a means of accessing the pump's history database which stores _events_ such as sensor values and boluses. The app can retrieve the number of stored records as well as the actual records, including optional filtering such as "last record" or "all records within a given range of sequence numbers".
+
+The setup and workflow is analogous to that of the _IDD Command_ interface: The app sends requests through the _RACP_ and the pump sends the data by notifications of the _IDD History Data_. Since this reply can span multiple records, the pump _indicates_ the _RACP_ to confirm the end of execution.
+
+* _Record Access Control Point_
+	* app sends command to the pump
+	* pump sends back final "command execution finished" (indications)
+	* not encrypted (!)
+* _IDD History Data_
+	* pump sends back data in response (notifications)
+	* SAKE-encrypted
+
+### Format of History Data
+
+The structure of the _IDD History Data_ responses follows the spec [[IDS, sec. 4.9]](#ref-ids):
+
+Field Name                  | Data Type    | Size (octets) | Unit
+----------------------------|--------------|---------------|------
+Event Type                  | Enum of u16  | 2             | None
+Sequence Number             | u32          | 4             | None
+Relative Offset             | u16          | 2             | seconds
+Event Data                  | variable     | 0–10          | None
+E2E-Counter                 | u8           | 0 or 1        | N/A
+E2E-CRC                     | u16          | 0 or 2        | N/A
+
+Medtronic defines a couple of custom event types in the spec's manufacturer-reserved range of event types. They also slightly modify existing event types defined in the spec:
+
+- Event type _Bolus Programmed Part 1 of 2_ uses 4-byte floats for fields _Programmed Bolus Fast Amount_ and _Programmed Bolus Extended Amount_ instead of 2-byte floats
+- Event type _Bolus Delivered Part 1 of 2_ uses 4-byte floats for fields _Delivered Bolus Fast Amount_ and _Delivered Bolus Extended Amount_ instead of 2-byte floats
+- Event type _Delivered Basal Rate Changed_ uses 4-byte floats for fields _Old Basal Rate Value_ and _New Basal Rate Value_ instead of 2-byte floats
+- Event type _Max Bolus Amount Changed_ uses 4-byte floats for fields _Old Max Bolus Amount_ and _New Max Bolus Amount_ instead of 2-byte floats
+
+The field _Relative Offset_ encodes the event's timestamp relative to the latest event of type _NGP Reference Time_ preceeding it. The latter encodes an absolute date time and is automatically generated by the pump every hour or so.
+
+The _Event Data_ field for the custom Medtronic event types in responses to _Report Stored Records_ requests (opcode 0x33) is structured as follows:
+
+
+#### Auto Basal Delivery (event type 0xf001)
+
+Field Name                  | Data Type    | Size (octets) | Unit
+----------------------------|--------------|---------------|------
+Bolus Number                | u8           | 1             | None
+Bolus Amount                | f32          | 4             | IU
+
+
+#### CL1 Transition (event type 0xf002)
+
+Field Name                  | Data Type    | Size (octets) | Unit
+----------------------------|--------------|---------------|------
+Transition State            | Enum of u8   | 1             | None
+
+The following values are defined for field _Transition State_:
+
+Value | Definition
+------|-----------------
+0x00  | Into SI Pass
+0x01  | Out User Override
+0x02  | Out Alarm
+0x03  | Out Timeout Safe Basal
+0x04  | Out High SG
+
+
+#### Therapy Context (event type 0xf004)
+
+Field Name                      | Data Type    | Size (octets) | Unit
+--------------------------------|--------------|---------------|------
+Flags                           | 8 bit        | 1             | None
+Basal Rate                      | f32          | 4             | IU/h (?)
+Insulin Delivery Stopped Reason | Enum of u8   | 1             | None
+TBR Type                        | Enum of u8   | 1             | None
+TBR Adjustment                  | f32          | 4             | IU/h (?)
+
+NOTE: TBR stands for "temporary basal rate".
+
+Bits in the _Flags_ field are defined as follows:
+
+Bit | Definition               | Description
+----|--------------------------|-------------
+0   | Sensor Enabled           |
+1   | Basal Rate Active        | If this bit is set, field _Basal Rate_ is present
+2   | Auto Mode Active         |
+3   | Insulin Delivery Stopped | If this bit is set, field _Insulin Delivery Stopped Reason_ is present
+4   | TBR Active               | If this bit is set, fields _TBR Type_ and _TBR Adjustment_ are present
+
+The following values are defined for field _Insulin Delivery Stopped Reason_:
+
+Value | Definition
+------|-----------------
+0x01  | Alarm Suspended
+0x02  | User Suspended
+0x03  | Auto Suspended
+0x04  | Low SG Suspended
+0x05  | Not Seated
+0x0a  | PLGM On Low SG Suspended
+
+The values for field _TBR Type_ are as defined in [[IDS, sec. 4.5.2.8.2]](#ref-ids):
+
+Value | Definition
+------|--------------
+0x0f  | Undetermined
+0x33  | Absolute
+0x3c  | Relative
+
+
+#### Meal (event type 0xf005)
+
+Field Name                  | Data Type    | Size (octets) | Unit
+----------------------------|--------------|---------------|------
+Food Amount                 | f16          | 2             | g (?)
+
+
+#### BG Reading (event type 0xf007)
+
+Field Name                  | Data Type    | Size (octets) | Unit
+----------------------------|--------------|---------------|------
+Time Offset                 | u16          | 2             | ???
+BG Value                    | f16          | 2             | kg/L
+
+NOTE: Convert the value in field _BG Value_ to the more common unit mg/dL by multiplying with 10⁵.
+
+
+#### Calibration Complete (0xf008)
+
+Field Name                  | Data Type    | Size (octets) | Unit
+----------------------------|--------------|---------------|------
+Time Offset                 | u16          | 2             | ???
+BG Measurement              | f16          | 2             | kg/L
+
+NOTE: Convert the value in field _BG Measurement_ to the more common unit mg/dL by multiplying with 10⁵.
+
+
+#### Calibration Rejected (0xf009)
+
+Field Name                  | Data Type    | Size (octets) | Unit
+----------------------------|--------------|---------------|------
+Time Offset                 | u16          | 2             | ???
+BG Measurement              | f16          | 2             | kg/L
+
+NOTE: Convert the value in field _BG Measurement_ to the more common unit mg/dL by multiplying with 10⁵.
+
+
+#### Insulin Delivery Stopped (event type 0xf00a)
+
+Field Name                      | Data Type    | Size (octets) | Unit
+--------------------------------|--------------|---------------|------
+Insulin Delivery Stopped Reason | Enum of u8   | 1             | None
+
+See section [Therapy Context (event type 0xf004)](#therapy-context-event-type-0xf004) for a definition of values for this field.
+
+
+#### Insulin Delivery Restarted (event type 0xf00b)
+
+Field Name                        | Data Type    | Size (octets) | Unit
+----------------------------------|--------------|---------------|------
+Insulin Delivery Restarted Reason | Enum of u8   | 1             | None
+
+The following values are defined for field _Insulin Delivery Restarted Reason_:
+
+Value | Definition
+------|-----------------
+0x01  | User Selects Resume
+0x02  | User Clears Alarm
+0x03  | LGM Manual Resume
+0x04  | LGM Auto Resume Due Max Suspended Time
+0x05  | LGM Auto Resume Due PSG And SG
+0x06  | LGM Manual Resume Via Disable
+
+
+#### SG Measurement (event type 0xf00c)
+
+Field Name                  | Data Type    | Size (octets) | Unit
+----------------------------|--------------|---------------|------
+Time Offset                 | u16          | 2             | ???
+SG Value                    | u16          | 2             | mg/dL
+ISIG                        | u16          | 2             | ???
+V Counter                   | u16          | 2             | ???
+
+NOTE: The unit of the _SG Value_ field may depend on the value of the bit _Glucose Unit mg/dL Used_ in the data read from the _IDD Feature_ characteristic.
+
+NOTE: The _ISIG_ field probably encodes the raw glucose sensor values. Older pumps such as the 640G, together with a _Guardian 2 Link_, exposed an "ISIG value" to the user. Calibrating the sensor would compute a scaling factor that translated the raw ISIG value into a blood glucose value in mg/dL. The 780G does not show the ISIG value to the user anymore.
+
+
+#### CGM Analytics Data Backfill (event type 0xf00d)
+
+Field Name                  | Data Type    | Size (octets) | Unit
+----------------------------|--------------|---------------|------
+Time Offset                 | u16          | 2             | ???
+PSGV                        | f16          | 2             | ???
+Cal Factor                  | u16          | 2             | ???
+
+
+#### NGP Reference Time (event type 0xf00e)
+
+Field Name                  | Data Type    | Size (octets) | Unit
+----------------------------|--------------|---------------|------
+Recording Reason            | Enum of u8   | 1             | None
+Date Time                   | see note     | 7             | see note
+
+This is a stripped-down version of the _Reference Time_ defined in [[IDS, sec. 4.9.4.1]](#ref-ids), without time zone and DST offset.
+
+All other event types reference this absolute time stamp by their _Relative Offset_ field.
+
+NOTE: See [[GSS, sec. 3.79]](#ref-gss) for the definition of this type.
+
+
+#### Annunciation Cleared (event type 0xf00f)
+
+Field Name                  | Data Type    | Size (octets) | Unit
+----------------------------|--------------|---------------|------
+Fault ID                    | u16          | 2             | None
+Instance ID                 | u16          | 2             | None
+
+
+#### Annunciation Consolidated (event type 0xf010)
+
+_TODO:_
+
+
+#### Max Auto Basal Rate Changed (event type 0xf01a)
+
+Field Name              | Data Type    | Size (octets) | Unit
+------------------------|--------------|---------------|------
+Old Rate                | f32          | 4             | IU/h (?)
+New Rate                | f32          | 4             | IU/h (?)
+
+
+
 ## References
+
+<a id="ref-gss"></a>
+**[GSS]**
+[GATT Specification Supplement (GSS)](specs/GATT_Specification_Supplement.pdf), Bluetooth® Document, 2025-12-23
 
 <a id="ref-idp"></a>
 **[IDP]**

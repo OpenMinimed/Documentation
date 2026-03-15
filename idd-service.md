@@ -51,12 +51,12 @@ Bit   | Definition                        | Description
 
 This characteristic can be read to determine various status changes of the pump. It is based on the homonymous characteristic defined in [[IDS]](#ref-ids). The app can also configure this characteristic for indications to automatically receive the status changes when they happen.
 
-The specified characteristic value consists of a single 16-bit flags field. Medtronic extends this to up to 48 bits in their version. They also populate some of the reserved bits with their custom ones. The extension mechanism is very similar to the one in _IDD Feature_: If the highest bit in the current block is _set_, another block of 16 bits is appended, thus extending the flags.
+The specified characteristic value consists of a single 16-bit flags field. Medtronic extends this to up to 48 bits in their version. They also populate some of the reserved bits with their custom ones. The extension mechanism is very similar to the one in _IDD Features_: If the highest bit in the current block is _set_, another block of 16 bits is appended, thus extending the flags.
 
 Field Name    | Data Type    | Size (octets) | Unit
 --------------|--------------|---------------|------
 Flags         | 16–48 bit    | 2–6           | None
-E2E-Counter   | u8           | 0 ir 1        | N/A
+E2E-Counter   | u8           | 0 or 1        | N/A
 E2E-CRC       | u16          | 0 or 2        | N/A
 
 Per the spec, the pump is expected to retain the status of a bit of the _Flags_ field until its value is reset by the app through the _Reset Status_ procedure using the characteristic _IDD Status Reader Control Point_.

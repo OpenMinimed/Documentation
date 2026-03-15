@@ -17,7 +17,6 @@ This is a collection of mostly reverse-engineering notes that will (hopefully) e
     * [CGM service](cgm-service.md)
     * [IDD service](idd-service.md)
     * [NOS service](nos-service.md)
-    * [Data protocol](data-protocol.md)
 
 
 ## SAKE encryption

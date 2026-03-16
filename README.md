@@ -14,9 +14,9 @@ This is a collection of mostly reverse-engineering notes that will (hopefully) e
 * [Data types and notational conventions](gatt-data-conventions.md)
 * [App GATT services](app-services.md)
 * [Pump GATT services](pump-services.md)
-    * [CGM service](cgm-service.md)
-    * [IDD service](idd-service.md)
-    * [NOS service](nos-service.md)
+    * [Continuous Glucose Monitoring Service](cgm-service.md)
+    * [Insulin Delivery Service](idd-service.md)
+    * [Network Operational State Service](nos-service.md)
 
 
 ## SAKE encryption

@@ -1,4 +1,4 @@
-# CGM service
+# Continuous Glucose Monitoring Service
 
 This service provides access to data from a CGM sensor (such as the Guardian 4) that is connected to the pump. Its core components is the _CGM Measurement_ characteristic which contains the actual sensor measurements. Configure notifications for this characteristic. The pump will then automatically send new CGM measurements as they come in from the sensor. Additionally, specific data records can be requested through the service's _Record Access Control Point_ characteristic and will also be delivered as notifications of the _CGM Measurement_ characteristic.
 

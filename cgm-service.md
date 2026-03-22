@@ -29,6 +29,33 @@ The implementation follows the standard defined in [[CGMS]](#ref-cgms) and [[GSS
 The data returned by the pump in this characteristic is SAKE-encrypted.
 
 
+## Session Start Time
+
+This characteristic provides the absolute time of the first CGM measurement taken. This serves as reference for the measurements reported in the _CGM Measurement_ characteristic which only contain a relative offset to this start time.
+
+The implementation follows the standard defined in [[CGMS]](#ref-cgms) and [[GSS, sec. 3.45]](#ref-gss) without any changes or additions, so we will not reproduce that information here.
+
+The data returned by the pump in this characteristic is SAKE-encrypted.
+
+
+## Session Run Time
+
+This characteristic provides the expected run time of the CGM session.
+
+The implementation follows the standard defined in [[CGMS]](#ref-cgms) and [[GSS, sec. 3.44]](#ref-gss) without any changes or additions, so we will not reproduce that information here.
+
+The data returned by the pump in this characteristic is SAKE-encrypted.
+
+
+## CGM Status
+
+This characteristic reports the current status of the CGM sensor. It contains the same status bits as the _Sensor Status Annunciation_ field in the _CGM Measurement_ characteristic but does not require a running CGM session that is reporting measurements.
+
+The implementation follows the standard defined in [[CGMS]](#ref-cgms) and [[GSS, sec. 3.47]](#ref-gss) without any changes or additions, so we will not reproduce that information here.
+
+The data returned by the pump in this characteristic is SAKE-encrypted.
+
+
 ## CGM Specific Ops Control Point (SOCP)
 
 A command (identified by its _opcode_) is sent by writing to this characteristic. The pump responds by sending an indication for the same characteristic.
@@ -157,6 +184,22 @@ Bit | Definition                         | Description
 3   | Has Calibration Recommended        |
 4   | Has Abnormal SG Increase Detection |
 5   | Calibration Transfer Supported     |
+
+
+## Time Of Sensor Expiration
+
+Field Name                   | Data Type    | Size (octets) | Unit
+-----------------------------|--------------|---------------|------
+Value                        | u16          | 2             | minutes
+
+
+## Time Of Next Calibration Recommended
+
+Field Name                   | Data Type    | Size (octets) | Unit
+-----------------------------|--------------|---------------|------
+Timestamp                    | u32          | 4             | ???
+Clock ID                     | u32          | 4             | None
+Time Offset                  | u16          | 2             | ???
 
 
 ## References

@@ -5,6 +5,7 @@ Term | Definition
 BG   | Blood Glucose
 BLE  | Bluetooth Low Energy
 CGM  | Continuous Glucose Monitoring
+GST  | Glucose Sensor Transmitter
 ISIG | Interstitial Signal: the raw glucose sensor readings
 LGS  | Low Glucose Suspend
 MMM  | MiniMed Mobile App

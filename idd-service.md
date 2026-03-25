@@ -47,6 +47,53 @@ Bit   | Definition                        | Description
 31    | Feature Extension 1               | custom extension; If this bit is set, an additional octet is attached (bits 32–39).
 
 
+## IDD Status
+
+This characteristic is based on the homonymous characteristic defined in [[IDS, sec. 4.2]](#ref-ids) but contains some extensions.
+
+Field Name                  | Data Type    | Size (octets) | Unit
+----------------------------|--------------|---------------|------
+Therapy Control State       | Enum of u8   | 1             | None
+Operational State           | Enum of u8   | 1             | None
+Reservoir Remaining Amount  | f32          | 4             | mg/dL (?)
+Flags                       | 8 bit        | 1             | None
+Sensor Connectivity State   | 8 bit        | 1             | None
+Sensor Message State        | Enum of u8   | 1             | None
+E2E-Counter                 | u8           | 0 or 1        | N/A
+E2E-CRC                     | u16          | 0 or 2        | N/A
+
+See the spec for values of fields _Therapy Control State_, _Operational State_, _Flags_.
+
+Bits in the _Sensor Connectivity State_ field are defined as follows:
+
+Bit | Definition                        | Description
+----|-----------------------------------|-------------
+ 0  | Sensor On                         |
+ 1  | Sensor Paired                     |
+ 2  | GST Signal Lost                   |
+ 3  | Sensor GST Detached               |
+
+The following values are defined for the _Sensor Message State_ field:
+
+Value | Definition
+------|------------
+0x00  | No Message
+0x01  | Wait To Calibrate
+0x02  | Do Not Calibrate
+0x03  | Calibration Required
+0x04  | Calibrating
+0x05  | Searching For Sensor Signal
+0x06  | No Sensor Signal
+0x07  | Change Sensor
+0x08  | Warm-up
+0x09  | SG Below Lower Limit
+0x0a  | SG Above Upper Limit
+0x0b  | GST Battery Depleted
+0x0c  | Sensor Connected
+0x0d  | Waiting Warm-up
+0x0e  | No Paired Sensor
+
+
 ## IDD Status Changed
 
 This characteristic can be read to determine various status changes of the pump. It is based on the homonymous characteristic defined in [[IDS]](#ref-ids). The app can also configure this characteristic for indications to automatically receive the status changes when they happen.
@@ -65,9 +112,9 @@ Bits in the _Flags_ field are defined as follows (Medtronic's custom extensions 
 
 Bit   | Definition                               | Description
 ------|------------------------------------------|-------------
- 0    | Therapy Control State Changed            |
- 1    | Operational State Changed                |
- 2    | Reservoir Status Changed                 |
+ 0    | Therapy Control State Changed            | new value in _Therapy Control State_ field of [IDD Status](#idd-status)
+ 1    | Operational State Changed                | new value in _Operational State_ field of [IDD Status](#idd-status)
+ 2    | Reservoir Status Changed                 | new value in _Reservoir Remaining Amount_ field of [IDD Status](#idd-status)
  3    | Annunciation Status Changed              |
  4    | Total Daily Insulin Status Changed       |
  5    | Active Basal Rate Status Changed         |

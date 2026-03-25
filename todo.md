@@ -31,7 +31,7 @@
     - characteristic _Device Name_ in standard _Generic Access Service_ (for its BLE device name)
   - [ ] battery percentage
     - pump implements _Battery_ service which has _Battery Level_ characteristic
-    - but there is also characteristic _GST Battery Level_ in the _Insulin Delivery Service_
+    - but there is also characteristic _GST Battery Level_ in the _Insulin Delivery Service_ for the transmitter
   - [ ] version infos
     - characteristic _Hardware Revision String_ and _Firmware Revision String_ in standard _Device Information Service_
   - [ ] model number
@@ -42,10 +42,13 @@
 - pump status 
   - [ ] current date time
   - [ ] smartguard state
+    - characteristic _IDD Status Reader Control Point_ with custom Medtronic Op Code 0x3fd (Get Therapy Algorithm States) -> Response Op Code 0x3fe (Get Therapy Algorithm States Response)
   - [ ] insulin amounts
     - [ ] currently active
+      - characteristic _IDD Status Reader Control Point_ with standard Op Code 0x3f3 (Get Insulin On Board) -> Response Op Code 0x3fc (Get Insulin On Board Response)
     - [ ] left in the tank
     - [ ] active basal rate if not in smartguard
+      - characteristic _IDD Status Reader Control Point_ with standard Op Code 0x365 (Get Active Basal Rate Delivery) -> Response Op Code 0x36a (Get Active Basal Rate Delivery Response)
 
 - history data
   - [ ] food intake

@@ -542,6 +542,14 @@ Old Rate                | f32          | 4             | IU/h (?)
 New Rate                | f32          | 4             | IU/h (?)
 
 
+## GST Battery Level
+
+This characteristic reports the battery level of the glucose sensor transmitter as a value between 0 and 100 %. It looks just like the standard _Battery Level_ characteristic defined in [[GSS, sec. 3.30]](#ref-gss):
+
+Field Name                  | Data Type    | Size (octets) | Unit
+----------------------------|--------------|---------------|------
+Battery Level               | u8           | 1             | %
+
 
 ## References
 

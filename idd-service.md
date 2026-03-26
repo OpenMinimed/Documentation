@@ -143,6 +143,306 @@ Bit   | Definition                               | Description
 33    | Early Sensor Calibration Time Changed    | custom extension
 
 
+## IDD Status Reader Control Point
+
+This characteristic is based on the homonymous characteristic defined in [[IDS, sec. 4.5]](#ref-ids). Write a command to it (encoded by an _opcode_) to retrieve status information such as currently running boluses. The responses are sent as indications for the same characteristic. Such an indication also confirms the end of the command's execution.
+
+### Opcodes
+
+The spec defines a large table of opcodes encoding different commands [[IDS, table 4.14]](#ref-ids), all of which the 780G pump seems to support. Some portions of the value range are marked as "prohibited". Medtronic uses on of these for the following custom opcodes:
+
+Value  | Definition                                  | Description
+-------|---------------------------------------------|-------------
+0x03fd | Get Therapy Algorithm States                | Medtronic custom
+0x03fe | Get Therapy Algorithm States Response       | Medtronic custom
+0x03ff | Get Display Format                          | Medtronic custom
+0x0400 | Get Display Format Response                 | Medtronic custom
+0x0401 | Get Time In Range Data                      | Medtronic custom
+0x0402 | Get Time In Range Data Response             | Medtronic custom
+0x0403 | Get Sensor Warm-up Time Remaining           | Medtronic custom
+0x0404 | Get Sensor Warm-up Time Remaining Response  | Medtronic custom
+0x0405 | Get Sensor Calibration Status Icon          | Medtronic custom
+0x0406 | Get Sensor Calibration Status Icon Response | Medtronic custom
+0x0407 | Get Early Sensor Calibration Time           | Medtronic custom
+0x0408 | Get Early Sensor Calibration Time Response  | Medtronic custom
+
+The opcodes that contain "response" in the name are used only in responses, the other ones only when sending commands.
+
+Medtronic also slightly modifies some of the commands and responses defined in the spec:
+
+- _Reset Status_ uses the extended _Flags_ field defined in _IDD Status Changed_
+- _Get Active Basal Rate Delivery Response_ uses:
+    - 4-byte floats instead of 2-byte floats for field _Active Basal Rate Current Config Value_
+    - 4-byte floats instead of 2-byte floats for field _TBR Adjustment Value_
+- _Get Active Bolus Delivery Response_ uses:
+    - 4-byte floats instead of 2-byte floats for field _Bolus Fast Amount_
+    - 4-byte floats instead of 2-byte floats for field _Bolus Extended Amount_
+
+
+### Format of modified standard _Get Insulin On Board Response_
+
+This standard response contains enough custom Medtronic extensions to warrant documentation here:
+
+Field Name                   | Data Type    | Size (octets) | Unit
+-----------------------------|--------------|---------------|------
+Response Opcode              | Value 0x03fc | 2             | None
+Flags                        | 8 bit        | 1             | None
+Insulin On Board             | f32          | 4             | IU
+Remaining Duration           | u16          | 0 or 2        | minutes
+IOB Partial Status Duration  | u16          | 0 or 2        | minutes (?)
+IOB Partial Status Remaining | u16          | 0 or 2        | ???
+E2E-Counter                  | u8           | 0 or 1        | N/A
+E2E-CRC                      | u16          | 0 or 2        | N/A
+
+Bits in the _Flags_ field are defined as follows:
+
+Bit | Definition                 | Description
+----|----------------------------|-------------
+0   | Remaining Duration Present | If this bit is set, field _Remaining Duration_ is present
+1   | IOB Partial Status Present | If this bit is set, fields _IOB Partial Status Duration_ and _IOB Partial Status Remaining_ are present (Medtronic custom)
+
+
+### Format of custom _Get Therapy Algorithm States_ command and response
+
+#### Command structure
+
+Field Name    | Data Type    | Size (octets) | Unit
+--------------|--------------|---------------|------
+Opcode        | Value 0x03fd | 2             | None
+E2E-Counter   | u8           | 0 or 1        | N/A
+E2E-CRC       | u16          | 0 or 2        | N/A
+
+#### Response structure
+
+Field Name                 | Data Type    | Size (octets) | Unit
+---------------------------|--------------|---------------|------
+Response Opcode            | Value 0x03fe | 2             | None
+Flags                      | 16 bit       | 2             | None
+Auto Mode Shield State     | Enum of u8   | 1             | None
+Auto Mode Readiness State  | Enum of u8   | 1             | None
+PLGM State                 | Enum of u8   | 1             | None
+LGS State                  | Enum of u8   | 1             | None
+Temp Target Duration       | u16          | 2             | minutes (?)
+Wait To Calibrate Duration | u16          | 2             | minutes (?)
+Safe Basal Duration        | u16          | 2             | minutes (?)
+E2E-Counter                | u8           | 0 or 1        | N/A
+E2E-CRC                    | u16          | 0 or 2        | N/A
+
+Bits in the _Flags_ field are defined as follows:
+
+Bit | Definition                | Description
+----|---------------------------|-------------
+0   | Auto Mode Present         | If this bit is set, fields _Auto Mode Shield State_ and _Auto Mode Readiness State_ are present
+1   | LGS Present               | If this bit is set, field _LGS State_ is present
+2   | PLGM Present              | If this bit is set, field _PLGM State_ is present
+3   | Temp Target Present       | If this bit is set, field _Temp Target Duration_ is present
+4   | Wait To Calibrate Present | If this bit is set, field _Wait To Calibrate Duration_ is present
+5   | Safe Basal Present        | If this bit is set, field _Safe Basal Duration_ is present
+
+The following values are defined for the _Auto Mode Shield State_ field:
+
+Value | Definition
+------|------------
+0x01  | Open Loop
+0x02  | Auto Basal Mode
+0x03  | Safe Basal Mode
+
+The following values are defined for the _Auto Mode Readiness State_ field:
+
+Value | Definition
+------|------------
+0x00  | No Action Required
+0x01  | BG Required
+0x02  | Processing BG
+0x03  | Waiting To Enter BG
+0x04  | Calibration Required
+0x05  | BG Recommended
+
+The following values are defined for the _PLGM State_ field:
+
+Value | Definition
+------|------------
+0x00  | Feature On SG Unavailable
+0x01  | Feature On Suspended
+0x02  | Feature On
+
+The following values are defined for the _LGS State_ field:
+
+Value | Definition
+------|------------
+0x00  | Feature On SG Unavailable
+0x01  | Feature On Suspended
+0x02  | Feature On
+
+### Format of custom _Get Display Format_ command and response
+
+#### Command structure
+
+Field Name    | Data Type    | Size (octets) | Unit
+--------------|--------------|---------------|------
+Opcode        | Value 0x03ff | 2             | None
+E2E-Counter   | u8           | 0 or 1        | N/A
+E2E-CRC       | u16          | 0 or 2        | N/A
+
+#### Response structure
+
+Field Name                 | Data Type    | Size (octets) | Unit
+---------------------------|--------------|---------------|------
+Response Opcode            | Value 0x0400 | 2             | None
+Flags                      | 8 bit        | 1             | None
+Language                   | Enum of u8   | 0 or 1        | None
+E2E-Counter                | u8           | 0 or 1        | N/A
+E2E-CRC                    | u16          | 0 or 2        | N/A
+
+Bits in the _Flags_ field are defined as follows:
+
+Bit | Definition                | Description
+----|---------------------------|-------------
+0   | Time Format 24 Hours      | for display formatting
+1   | Language Non-English      | for display formatting; If this bit is set, field _Language_ is present
+2   | Exchange Carb Unit        | for display formatting
+3–5 | reserved/unused           |
+6–7 | Active Insulin Resolution | interpret this as enum (see below)
+
+The following values are defined for the _Active Insulin Resolution_ field:
+
+Value | Definition
+------|------------
+0x00  | Tenths
+0x01  | Hundredths
+0x02  | Thousandths
+
+The following values are defined for the _Language_ field:
+
+Value | Definition
+------|------------
+0x00  | German
+0x01  | Spanish
+0x02  | French
+0x03  | Italian
+0x04  | Dutch
+0x05  | Swedish
+0x06  | Czech
+0x07  | Danish
+0x08  | Hungarian
+0x09  | Norwegian
+0x0a  | Polish
+0x0b  | Portugese
+0x0c  | Slovene
+0x0d  | Finnish
+0x0e  | Turkish
+0x0f  | Hebrew
+0x10  | Arabic
+0x11  | Russian
+0x12  | Greek
+0x13  | Slovak
+0x14  | Chinese
+0x15  | Japanese
+0x16  | Korean
+
+### Format of custom _Get Time In Range Data_ command and response
+
+#### Command structure
+
+Field Name    | Data Type    | Size (octets) | Unit
+--------------|--------------|---------------|------
+Opcode        | Value 0x0401 | 2             | None
+E2E-Counter   | u8           | 0 or 1        | N/A
+E2E-CRC       | u16          | 0 or 2        | N/A
+
+#### Response structure
+
+Field Name                 | Data Type    | Size (octets) | Unit
+---------------------------|--------------|---------------|------
+Response Opcode            | Value 0x0402 | 2             | None
+Not Enough Data Flag       | u8           | 1             | None
+Above                      | u8           | 1             | %
+Below                      | u8           | 1             | %
+In Range                   | u8           | 1             | %
+Smart Guard                | u8           | 1             | %
+E2E-Counter                | u8           | 0 or 1        | N/A
+E2E-CRC                    | u16          | 0 or 2        | N/A
+
+### Format of custom _Get Sensor Warm-up Time Remaining_ command and response
+
+#### Command structure
+
+Field Name    | Data Type    | Size (octets) | Unit
+--------------|--------------|---------------|------
+Opcode        | Value 0x0403 | 2             | None
+E2E-Counter   | u8           | 0 or 1        | N/A
+E2E-CRC       | u16          | 0 or 2        | N/A
+
+#### Response structure
+
+Field Name                 | Data Type    | Size (octets) | Unit
+---------------------------|--------------|---------------|------
+Response Opcode            | Value 0x0404 | 2             | None
+Time                       | u8           | 1             | hours (?)
+E2E-Counter                | u8           | 0 or 1        | N/A
+E2E-CRC                    | u16          | 0 or 2        | N/A
+
+### Format of custom _Get Sensor Calibration Status Icon_ command and response
+
+#### Command structure
+
+Field Name    | Data Type    | Size (octets) | Unit
+--------------|--------------|---------------|------
+Opcode        | Value 0x0405 | 2             | None
+E2E-Counter   | u8           | 0 or 1        | N/A
+E2E-CRC       | u16          | 0 or 2        | N/A
+
+#### Response structure
+
+Field Name                 | Data Type    | Size (octets) | Unit
+---------------------------|--------------|---------------|------
+Response Opcode            | Value 0x0406 | 2             | None
+Value                      | u8           | 1             | None
+E2E-Counter                | u8           | 0 or 1        | N/A
+E2E-CRC                    | u16          | 0 or 2        | N/A
+
+The following values are defined for the _Value_ field:
+
+Value | Definition
+------|------------
+0x00  | No Icon
+0x01  | Undefined
+0x02  | Init
+0x03  | Calibration Required Legacy
+0x04  | 0 Hours
+0x05  | 2 Hours
+0x06  | 4 Hours
+0x07  | 6 Hours
+0x08  | 8 Hours
+0x09  | 10 Hours
+0x0a  | No Calibration Required
+0x0b  | Early Calibration
+0x0c  | Calibration Recommended
+0x0d  | Calibration Required
+0x0e  | HCL Requires BG Legacy
+0x0f  | HCL requires BG
+
+### Format of custom _Get Early Sensor Calibration Time_ command and response
+
+#### Command structure
+
+Field Name    | Data Type    | Size (octets) | Unit
+--------------|--------------|---------------|------
+Opcode        | Value 0x0407 | 2             | None
+E2E-Counter   | u8           | 0 or 1        | N/A
+E2E-CRC       | u16          | 0 or 2        | N/A
+
+#### Response structure
+
+Field Name                 | Data Type    | Size (octets) | Unit
+---------------------------|--------------|---------------|------
+Response Opcode            | Value 0x0408 | 2             | None
+Hours                      | u8           | 1             | hours
+Minutes                    | u8           | 1             | minutes
+E2E-Counter                | u8           | 0 or 1        | N/A
+E2E-CRC                    | u16          | 0 or 2        | N/A
+
+
 ## IDD Command Control Point & IDD Command Data
 
 The spec for the _Insulin Delivery Service_ defines the characteristic _IDD Command Control Point_ for "adapting therapy parameters to enable the remote operation of the insulin therapy as well as the remote operation for device maintenance" [[IDS]](#ref-ids). Together with a second characteristic _IDD Command Data_ it implements a simple "command in, data out" interface:

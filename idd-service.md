@@ -236,10 +236,10 @@ Settings Type               | Enum of u8   | 1             | None
 1st Time Block Number Index | u8           | 1             | None
 1st Duration                | u16          | 2             | minutes
 1st SG Limit                | f16          | 2             | see note
-2nd Duration                | u16          | 2             | minutes
-2nd SG Limit                | f16          | 2             | see note
-3rd Duration                | u16          | 2             | minutes
-3rd SG Limit                | f16          | 2             | see note
+2nd Duration                | u16          | 0 or 2        | minutes
+2nd SG Limit                | f16          | 0 or 2        | see note
+3rd Duration                | u16          | 0 or 2        | minutes
+3rd SG Limit                | f16          | 0 or 2        | see note
 E2E-Counter                 | u8           | 0 or 1        | N/A
 E2E-CRC                     | u16          | 0 or 2        | N/A
 

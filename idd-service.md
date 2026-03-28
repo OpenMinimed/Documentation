@@ -628,6 +628,8 @@ The setup and workflow is analogous to that of the _IDD Command_ interface: The 
 	* pump sends back data in response (notifications)
 	* SAKE-encrypted
 
+Contrary to [[IDS, table 3.22]](#ref-ids), Medtronic not only allows an operand for opcodes _Report Records_, _Report Number of Stored Records_, and _Delete Stored Records_ in combinatation with operators _All records_, _First/Last record_ in writes to the _RACP_, it actually _requires_ the operand to be present. Its value can be either of the filter types listed in [[IDS, table 3.24]](#ref-ids).
+
 ### Format of History Data
 
 The structure of the _IDD History Data_ responses follows the spec [[IDS, sec. 4.9]](#ref-ids):

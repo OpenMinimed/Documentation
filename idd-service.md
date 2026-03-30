@@ -628,7 +628,54 @@ The setup and workflow is analogous to that of the _IDD Command_ interface: The 
 	* pump sends back data in response (notifications)
 	* SAKE-encrypted
 
-Contrary to [[IDS, table 3.22]](#ref-ids), Medtronic not only allows an operand for opcodes _Report Records_, _Report Number of Stored Records_, and _Delete Stored Records_ in combinatation with operators _All records_, _First/Last record_ in writes to the _RACP_, it actually _requires_ the operand to be present. Its value can be either of the filter types listed in [[IDS, table 3.24]](#ref-ids).
+Contrary to [[IDS, table 3.22]](#ref-ids), Medtronic not only allows an operand for opcodes _Report Records_, _Report Number of Stored Records_, and _Delete Stored Records_ in combinatation with operators _All records_, _First/Last record_ in writes to the _RACP_, it actually _requires_ the operand to be present. Its value can be either of the filter types listed for the respective combination in the following table. Other values will result in a response with _Response Code Operand not supported_.
+
+<table>
+<tr>
+    <th>Op Code</th>
+    <th>Operator</th>
+    <th>Operand (Filter Type)</th>
+</tr>
+<tr>
+    <td rowspan="3">Report Stored Records</td>
+    <td>All records</td>
+    <td>Sequence Number, Sequence Number filtered by Reference Time Event</td>
+</tr>
+<tr>
+    <td>First record</td>
+    <td>Sequence Number</td>
+</tr>
+<tr>
+    <td>Last record</td>
+    <td>Sequence Number</td>
+</tr>
+<tr>
+    <td rowspan="3">Report Number of Stored Records</td>
+    <td>All records</td>
+    <td>Sequence Number</td>
+</tr>
+<tr>
+    <td>First record</td>
+    <td>Sequence Number</td>
+</tr>
+<tr>
+    <td>Last record</td>
+    <td>Sequence Number</td>
+</tr>
+<tr>
+    <td rowspan="3">Delete Stored Records</td>
+    <td>All records</td>
+    <td>Sequence Number, Sequence Number filtered by Reference Time Event (?)</td>
+</tr>
+<tr>
+    <td>First record</td>
+    <td>Sequence Number (?)</td>
+</tr>
+<tr>
+    <td>Last record</td>
+    <td>Sequence Number (?)</td>
+</tr>
+</table>
 
 ### Format of History Data
 

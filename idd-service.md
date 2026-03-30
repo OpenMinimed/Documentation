@@ -632,7 +632,7 @@ Contrary to [[IDS, table 3.22]](#ref-ids), Medtronic not only allows an operand 
 
 ### Format of History Data
 
-The structure of the _IDD History Data_ responses follows the spec [[IDS, sec. 4.9]](#ref-ids):
+The structure of the _IDD History Data_ responses follows the spec [[IDS, sec. 4.9]](#ref-ids) but it adds the optional _E2E-Counter_ field that the spec explicitly omits for this characteristic:
 
 Field Name                  | Data Type    | Size (octets) | Unit
 ----------------------------|--------------|---------------|------

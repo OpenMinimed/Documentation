@@ -15,6 +15,7 @@ This is a collection of mostly reverse-engineering notes that will (hopefully) e
 * [App GATT services](app-services.md)
 * [Pump GATT services](pump-services.md)
     * [Continuous Glucose Monitoring Service](cgm-service.md)
+    * [History And Trace Service](hat-service.md)
     * [Insulin Delivery Service](idd-service.md)
     * [Network Operational State Service](nos-service.md)
 

@@ -44,7 +44,7 @@ This characteristic provides the expected run time of the CGM session.
 
 The implementation follows the standard defined in [[CGMS]](#ref-cgms) and [[GSS, sec. 3.44]](#ref-gss) without any changes or additions, so we will not reproduce that information here.
 
-The data returned by the pump in this characteristic is SAKE-encrypted.
+The data returned by the pump in this characteristic is **NOT** SAKE-encrypted.
 
 
 ## CGM Status

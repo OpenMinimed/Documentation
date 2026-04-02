@@ -269,9 +269,9 @@ Value | Definition
 Field Name                  | Data Type    | Size (octets) | Unit
 ----------------------------|--------------|---------------|------
 Opcode                      | Value 0x0b   | 1             | None
-Parameter Type              | Enum of u8   | 1             |
-Encryption Setting          | Enum of u8   | 0 or 1        |
-Compression Setting         | Enum of u8   | 0 or 1        |
+Parameter Type              | Enum of u8   | 1             | None
+Encryption Setting          | Enum of u8   | 0 or 1        | None
+Compression Setting         | Enum of u8   | 0 or 1        | None
 
 The following values are defined for the _Parameter Type_ field:
 
@@ -280,9 +280,7 @@ Value | Definition          | Description
 0x00  | Compression Setting | If this value is set, field _Compression Setting_ is present
 0x01  | Encryption Setting  | If this value is set, field _Encryption Setting_ is present
 
-The following values are defined for the _Compression Setting_ field:
-
-The following values are defined for the _Encryption Setting_ field:
+Values for fields _Compression Setting_ and _Encryption Setting_ are as defined for the [_Get Transfer Block Parameters_](#format-of-get-transfer-block-parameters-command-and-response).
 
 #### Response structure
 

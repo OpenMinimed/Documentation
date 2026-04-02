@@ -224,7 +224,7 @@ Slice Size                  | u16          | 2             | bytes (?)
 
 #### Response structure
 
-???
+The response is the same as the one to the [_Get Slice Transport Parameters_](#format-of-get-slice-transport-parameters-command-and-response) command.
 
 
 ### Format of _Get Transfer Block Parameters_ command and response
@@ -284,7 +284,7 @@ Values for fields _Compression Setting_ and _Encryption Setting_ are as defined 
 
 #### Response structure
 
-???
+The response is the same as the one to the [_Get Transfer Block Parameters_](#format-of-get-transfer-block-parameters-command-and-response) command.
 
 
 ### Format of _End Transfer Session_ command and response

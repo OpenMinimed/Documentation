@@ -780,7 +780,7 @@ Food Amount                 | f16          | 2             | g (?)
 
 Field Name                  | Data Type    | Size (octets) | Unit
 ----------------------------|--------------|---------------|------
-Time Offset                 | u16          | 2             | ???
+Time Offset                 | i16          | 2             | minutes
 BG Value                    | f16          | 2             | kg/L
 
 NOTE: Convert the value in field _BG Value_ to the more common unit mg/dL by multiplying with 10⁵.
@@ -790,7 +790,7 @@ NOTE: Convert the value in field _BG Value_ to the more common unit mg/dL by mul
 
 Field Name                  | Data Type    | Size (octets) | Unit
 ----------------------------|--------------|---------------|------
-Time Offset                 | u16          | 2             | ???
+Time Offset                 | i16          | 2             | minutes
 BG Measurement              | f16          | 2             | kg/L
 
 NOTE: Convert the value in field _BG Measurement_ to the more common unit mg/dL by multiplying with 10⁵.
@@ -800,7 +800,7 @@ NOTE: Convert the value in field _BG Measurement_ to the more common unit mg/dL 
 
 Field Name                  | Data Type    | Size (octets) | Unit
 ----------------------------|--------------|---------------|------
-Time Offset                 | u16          | 2             | ???
+Time Offset                 | i16          | 2             | minutes
 BG Measurement              | f16          | 2             | kg/L
 
 NOTE: Convert the value in field _BG Measurement_ to the more common unit mg/dL by multiplying with 10⁵.
@@ -837,10 +837,10 @@ Value | Definition
 
 Field Name                  | Data Type    | Size (octets) | Unit
 ----------------------------|--------------|---------------|------
-Time Offset                 | u16          | 2             | ???
+Time Offset                 | i16          | 2             | minutes
 SG Value                    | u16          | 2             | mg/dL
 ISIG                        | u16          | 2             | ???
-V Counter                   | u16          | 2             | ???
+V Counter                   | i16          | 2             | ???
 
 NOTE: The unit of the _SG Value_ field may depend on the value of the bit _Glucose Unit mg/dL Used_ in the data read from the _IDD Feature_ characteristic.
 
@@ -851,7 +851,7 @@ NOTE: The _ISIG_ field probably encodes the raw glucose sensor values. Older pum
 
 Field Name                  | Data Type    | Size (octets) | Unit
 ----------------------------|--------------|---------------|------
-Time Offset                 | u16          | 2             | ???
+Time Offset                 | i16          | 2             | minutes
 PSGV                        | f16          | 2             | ???
 Cal Factor                  | u16          | 2             | ???
 

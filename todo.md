@@ -12,7 +12,7 @@
     - [x] session start, session id
 	    - characterstic _CGM Session Start Time_
 	    - characteristic _CGM Specific Ops Control Point_ with custom Medtronic Op Code 0x8c (Read Current Session ID) -> Response Op Code 0x8d (Read Current Session ID Response)
-		    - this does not seem to be supported by the 780G, but session IDs are not needed as there only every seem to be exactly one session which is started automatically
+		    - this does not seem to be supported by the 780G, but session IDs are not needed as there only ever seems to be exactly one session which is started automatically
     - [x] sensor remaining life time
 	    - characterstics _CGM Session Start Time_ and _CGM Session Run Time_
 	    - compute the absolute end time from them, then compute the remaining time from current time to that end time

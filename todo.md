@@ -1,9 +1,4 @@
 
-
-## Reconnect
-
-- [ ] test reconnect on an esp32 @palmarci
-
 ## Documentation
 
 - [ ] write proper SAKE docs @palmarci
@@ -14,8 +9,8 @@
 - CGM stuff
     - [X] current sg
     - [ ] calibration status
-    - [ ] session start, session id
-    - [ ] sensor remaining life time (total lifetime - session time?)
+    - [x] session start, session id
+    - [x] sensor remaining life time (total lifetime - session time?)
     - [ ] trend info
         - See characteristic _CGM Measurement_, field _CGM Trend Information_. We already parse that in our example app.
         - Pump's manual gives a relation between rise/fall rates and arrows displayed:
@@ -26,15 +21,15 @@
         - characteristic _IDD Status Reader Control Point_ with custom Medtronic Op Code 0x401 (Get TIR Data) -> Response Op Code 0x402 (Get TIR Data Response)
 
 - device info
-  - [ ] pump name
+  - [x] pump name
     - characteristic _Serial Number String_ in standard _Device Information Service_
     - characteristic _Device Name_ in standard _Generic Access Service_ (for its BLE device name)
-  - [ ] battery percentage
+  - [x] battery percentage
     - pump implements _Battery_ service which has _Battery Level_ characteristic
     - but there is also characteristic _GST Battery Level_ in the _Insulin Delivery Service_ for the transmitter
-  - [ ] version infos
+  - [x] version infos
     - characteristic _Hardware Revision String_ and _Firmware Revision String_ in standard _Device Information Service_
-  - [ ] model number
+  - [x] model number
     - characteristic _Model Number String_ in standard _Device Information Service_
   - [ ] used display format (mmol/l?)
     - characteristic _IDD Feature_, field _Flags_, bit _Glucose Unit mg/dL Used_
@@ -47,12 +42,13 @@
     - [ ] currently active
       - characteristic _IDD Status Reader Control Point_ with standard Op Code 0x3f3 (Get Insulin On Board) -> Response Op Code 0x3fc (Get Insulin On Board Response)
     - [ ] left in the tank
-    - [ ] active basal rate if not in smartguard
+      - [ ] expected wear out time in hours (based on 2 days avg of used insulin)
+    - [ ] active basal rate (if not in smartguard?)
       - characteristic _IDD Status Reader Control Point_ with standard Op Code 0x365 (Get Active Basal Rate Delivery) -> Response Op Code 0x36a (Get Active Basal Rate Delivery Response)
 
 - history data
-  - [ ] food intake
-  - [ ] insulin intake
+  - [x] food intake
+  - [x] insulin intake
   - [ ] calibration (manual blood glucose enter)
   - [ ] suspends?
   - [ ] sport activity?

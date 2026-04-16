@@ -43,10 +43,10 @@
   - [ ] current date time
   - [ ] smartguard state
     - characteristic _IDD Status Reader Control Point_ with custom Medtronic Op Code 0x3fd (Get Therapy Algorithm States) -> Response Op Code 0x3fe (Get Therapy Algorithm States Response)
-  - [ ] insulin amounts
+  - insulin amounts
     - [X] currently active
       - characteristic _IDD Status Reader Control Point_ with standard Op Code 0x3f3 (Get Insulin On Board) -> Response Op Code 0x3fc (Get Insulin On Board Response)
-    - [ ] left in the tank
+    - [X] left in the tank
       - characteristic _IDD Status_, field _Reservoir Remaining Amount_
       - [ ] expected wear out time in hours (based on 2 days avg of used insulin)
     - [ ] active basal rate (if not in smartguard?)

@@ -218,13 +218,13 @@ Field Name                 | Data Type    | Size (octets) | Unit
 ---------------------------|--------------|---------------|------
 Response Opcode            | Value 0x03fe | 2             | None
 Flags                      | 16 bit       | 2             | None
-Auto Mode Shield State     | Enum of u8   | 1             | None
-Auto Mode Readiness State  | Enum of u8   | 1             | None
-PLGM State                 | Enum of u8   | 1             | None
-LGS State                  | Enum of u8   | 1             | None
-Temp Target Duration       | u16          | 2             | minutes (?)
-Wait To Calibrate Duration | u16          | 2             | minutes (?)
-Safe Basal Duration        | u16          | 2             | minutes (?)
+Auto Mode Shield State     | Enum of u8   | 0 or 1        | None
+Auto Mode Readiness State  | Enum of u8   | 0 or 1        | None
+PLGM State                 | Enum of u8   | 0 or 1        | None
+LGS State                  | Enum of u8   | 0 or 1        | None
+Temp Target Duration       | u16          | 0 or 2        | minutes (?)
+Wait To Calibrate Duration | u16          | 0 or 2        | minutes (?)
+Safe Basal Duration        | u16          | 0 or 2        | minutes (?)
 E2E-Counter                | u8           | 0 or 1        | N/A
 E2E-CRC                    | u16          | 0 or 2        | N/A
 

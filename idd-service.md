@@ -55,7 +55,7 @@ Field Name                  | Data Type    | Size (octets) | Unit
 ----------------------------|--------------|---------------|------
 Therapy Control State       | Enum of u8   | 1             | None
 Operational State           | Enum of u8   | 1             | None
-Reservoir Remaining Amount  | f32          | 4             | mg/dL (?)
+Reservoir Remaining Amount  | f32          | 4             | mg/dL
 Flags                       | 8 bit        | 1             | None
 Sensor Connectivity State   | 8 bit        | 1             | None
 Sensor Message State        | Enum of u8   | 1             | None

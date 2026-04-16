@@ -846,6 +846,8 @@ NOTE: The unit of the _SG Value_ field may depend on the value of the bit _Gluco
 
 NOTE: The _ISIG_ field probably encodes the raw glucose sensor values. Older pumps such as the 640G, together with a _Guardian 2 Link_, exposed an "ISIG value" to the user. Calibrating the sensor would compute a scaling factor that translated the raw ISIG value into a blood glucose value in mg/dL. The 780G does not show the ISIG value to the user anymore.
 
+NOTE: The _ISIG_ value reported by the pump is displayed by CareLink with an additional scale factor of 0.01, e.g. the raw value 1023 is displayed as 10.23.
+
 The _SG Value_ can have the following special values that must not be interpreted as regular sensor measurements:
 
 Value  | Definition

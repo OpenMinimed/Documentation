@@ -36,7 +36,7 @@
     - characteristic _Hardware Revision String_ and _Firmware Revision String_ in standard _Device Information Service_
   - [x] model number
     - characteristic _Model Number String_ in standard _Device Information Service_
-  - [ ] used display format (mmol/l?)
+  - [X] used display format (mmol/l?)
     - characteristic _IDD Feature_, field _Flags_, bit _Glucose Unit mg/dL Used_
 
 - pump status 

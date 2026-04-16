@@ -35,16 +35,23 @@ Flags                        | ≥ 24 bit    | ≥ 3           | None
 
 Bits in the _Flags_ field are defined as follows (Medtronic's custom extensions marked):
 
-Bit   | Definition                        | Description
-------|-----------------------------------|-------------
- 0–23 | see [[IDS, sec. 4.4.2]](#ref-ids) |
-24    | Reservoir Size 300 IU Supported   | custom extension
-25    | Glucose Unit mg/dL Used           | custom extension
-26    | LGS Feature Supported             | custom extension
-27    | PLGM Feature Supported            | custom extension
-28    | HCL Feature Supported             | custom extension
-29–30 | ???                               | custom extension; probably unused
-31    | Feature Extension 1               | custom extension; If this bit is set, an additional octet is attached (bits 32–39).
+Bit   | Definition                                   | Description
+------|----------------------------------------------|-------------
+ 0–23 | see [[IDS, sec. 4.4.2]](#ref-ids)            |
+24    | Reservoir Size 300 IU Supported              | custom extension
+25    | Glucose Unit mg/dL Used                      | custom extension
+26    | LGS Feature Supported                        | custom extension
+27    | PLGM Feature Supported                       | custom extension
+28    | HCL Feature Supported                        | custom extension
+29    | Smart Settings Supported                     | custom extension
+30    | Remote Bolus Supported                       | custom extension
+31    | Feature Extension 1                          | custom extension; If this bit is set, an additional octet is attached (bits 32–39).
+32    | Extended Timestamp Supported                 | custom extension
+33    | Extended Time Of Sensor Expiration Supported | custom extension
+34    | Sensor Warm-up Time Remaining Supported      | custom extension
+35    | Sensor Calibration Status Icon Supported     | custom extension
+36    | Two Calibration One Day Supported            | custom extension
+37    | Matrix Menu Supported                        | custom extension
 
 
 ## IDD Status

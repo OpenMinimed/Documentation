@@ -44,17 +44,21 @@
   - [ ] smartguard state
     - characteristic _IDD Status Reader Control Point_ with custom Medtronic Op Code 0x3fd (Get Therapy Algorithm States) -> Response Op Code 0x3fe (Get Therapy Algorithm States Response)
   - [ ] insulin amounts
-    - [ ] currently active
+    - [X] currently active
       - characteristic _IDD Status Reader Control Point_ with standard Op Code 0x3f3 (Get Insulin On Board) -> Response Op Code 0x3fc (Get Insulin On Board Response)
     - [ ] left in the tank
+      - characteristic _IDD Status_, field _Reservoir Remaining Amount_
       - [ ] expected wear out time in hours (based on 2 days avg of used insulin)
     - [ ] active basal rate (if not in smartguard?)
       - characteristic _IDD Status Reader Control Point_ with standard Op Code 0x365 (Get Active Basal Rate Delivery) -> Response Op Code 0x36a (Get Active Basal Rate Delivery Response)
 
 - history data
   - [x] food intake
+	- event type 0xf005 (Meal)
   - [x] insulin intake
-  - [ ] calibration (manual blood glucose enter)
+    - event types 0x005a (Bolus Programmed Part 1 of 2), 0x0066 (Bolus Programmed Part 2 of 2), 0x0069 (Bolus Delivered Part 1 of 2), 0x0096 (Bolus Delivered Part 2 of 2)
+  - [x] calibration (manual blood glucose enter)
+    - event types 0xf007 (BG Reading), 0xf008 (Calibration Complete), 0xf009 (Calibration Rejected)
   - [ ] suspends?
   - [ ] sport activity?
 

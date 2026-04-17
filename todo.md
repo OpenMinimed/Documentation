@@ -8,14 +8,14 @@
 
 ### CGM stuff
 
-- [X] current sg
+- [X] current SG
 - [ ] calibration status
-- [X] session start, session id
-    - characterstic _CGM Session Start Time_
+- [X] session start, session ID
+    - characteristic _CGM Session Start Time_
     - characteristic _CGM Specific Ops Control Point_ with custom Medtronic Op Code 0x8c (Read Current Session ID) → Response Op Code 0x8d (Read Current Session ID Response)
 	    - this does not seem to be supported by the 780G, but session IDs are not needed as there only ever seems to be exactly one session which is started automatically
 - [X] sensor remaining life time
-    - characterstics _CGM Session Start Time_ and _CGM Session Run Time_
+    - characteristics _CGM Session Start Time_ and _CGM Session Run Time_
     - compute the absolute end time from them, then compute the remaining time from current time to that end time
 - [X] trend info
     - See characteristic _CGM Measurement_, field _CGM Trend Information_. We already parse that in our example app.
@@ -45,7 +45,7 @@
 
 - [ ] current date time
     - characteristic _Current Time_
-- [X] smartguard state
+- [X] Smart Guard state
     - characteristic _IDD Status Reader Control Point_ with custom Medtronic Op Code 0x3fd (Get Therapy Algorithm States) → Response Op Code 0x3fe (Get Therapy Algorithm States Response)
 - insulin amounts
     - [X] currently active
@@ -69,6 +69,6 @@
 
 ### Annunciations
 
-- [ ] cgm (low, high, before low/high)
-- [ ] idd
+- [ ] CGM (low, high, before low/high)
+- [ ] IDD
 - [ ] research commands to clear alarms and warnings

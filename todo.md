@@ -49,7 +49,7 @@
     - [X] left in the tank
       - characteristic _IDD Status_, field _Reservoir Remaining Amount_
       - [ ] expected wear out time in hours (based on 2 days avg of used insulin)
-    - [ ] active basal rate (if not in smartguard?)
+    - [X] active basal rate (if not in Smart Guard)
       - characteristic _IDD Status Reader Control Point_ with standard Op Code 0x365 (Get Active Basal Rate Delivery) -> Response Op Code 0x36a (Get Active Basal Rate Delivery Response)
 
 - history data

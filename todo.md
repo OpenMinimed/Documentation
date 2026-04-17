@@ -44,7 +44,8 @@
 ### Pump status
 
 - [ ] current date time
-- [ ] smartguard state
+    - characteristic _Current Time_
+- [X] smartguard state
     - characteristic _IDD Status Reader Control Point_ with custom Medtronic Op Code 0x3fd (Get Therapy Algorithm States) → Response Op Code 0x3fe (Get Therapy Algorithm States Response)
 - insulin amounts
     - [X] currently active

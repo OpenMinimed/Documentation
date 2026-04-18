@@ -9,11 +9,7 @@ This characteristic can be read to retrieve pump features regarding the CGM. Mos
 
 The _E2E-CRC Supported_ bit seems to be always set for a 780G pump, which is why we explicitly mentiond it here.
 
-The characteristic is based on the standard defined in [[CGMS]](#ref-cgms) and [[GSS, sec. 3.42]](#ref-gss). There are no additions or changes to the flags that make up the actual feature list, so we will not reproduce them here. But Medtronic's version leaves out the _CGM Type-Sample Location_ field as well as the mandatory _E2E-CRC_ field, i.e. the structure of this characteristic looks like this:
-
-Field Name                   |  Data Type   | Size (octets) | Unit
------------------------------|--------------|---------------|------
-CGM Feature                  | 24 bit       | 3             | None
+The implementation follows the standard defined in [[CGMS]](#ref-cgms) and [[GSS, sec. 3.42]](#ref-gss) without any changes additions, so we will not reproduce that information here.
 
 Note that the data returned by the pump in this characteristic is _not_ SAKE-encrypted.
 

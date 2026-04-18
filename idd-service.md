@@ -75,10 +75,10 @@ Bits in the _Sensor Connectivity State_ field are defined as follows:
 
 Bit | Definition                        | Description
 ----|-----------------------------------|-------------
- 0  | Sensor On                         |
- 1  | Sensor Paired                     |
- 2  | GST Signal Lost                   |
- 3  | Sensor GST Detached               |
+ 0  | Sensor On                         | sensor enabled on the pump
+ 1  | Sensor Paired                     | transmitter paired to pump
+ 2  | GST Signal Lost                   | no transmitter signal (transmitter out of range or in charger)
+ 3  | Sensor GST Detached               | no sensor connected to transmitter
 
 The following values are defined for the _Sensor Message State_ field:
 

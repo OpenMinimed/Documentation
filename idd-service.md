@@ -372,6 +372,8 @@ E2E-CRC                    | u16          | 0 or 2        | N/A
 
 ### Format of custom _Get Sensor Warm-up Time Remaining_ command and response
 
+This command does not seem to be supported by the 780G pump. It always answers with _Response Code: Opcode not supported_. Maybe it is intended only for direct communication with the sensor.
+
 #### Command structure
 
 Field Name    | Data Type    | Size (octets) | Unit
@@ -390,6 +392,8 @@ E2E-Counter                | u8           | 0 or 1        | N/A
 E2E-CRC                    | u16          | 0 or 2        | N/A
 
 ### Format of custom _Get Sensor Calibration Status Icon_ command and response
+
+This command does not seem to be supported by the 780G pump. It always answers with _Response Code: Opcode not supported_. Maybe it is intended only for direct communication with the sensor.
 
 #### Command structure
 
@@ -430,6 +434,8 @@ Value | Definition
 0x0f  | HCL requires BG
 
 ### Format of custom _Get Early Sensor Calibration Time_ command and response
+
+This command does not seem to be supported by the 780G pump. It always answers with _Response Code: Opcode not supported_. Maybe it is intended only for direct communication with the sensor.
 
 #### Command structure
 

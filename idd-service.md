@@ -865,8 +865,8 @@ The _SG Value_ can have the following special values that must not be interprete
 
 Value  | Definition
 -------|------------
-0x0301 | ???
-0x0303 | ???
+0x0301 | Sensor is starting
+0x0303 | Sensor is updating
 0x030d | SG Value is below 50 mg/dL
 
 

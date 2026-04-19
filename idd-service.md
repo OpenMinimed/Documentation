@@ -901,7 +901,324 @@ Instance ID                 | u16          | 2             | None
 
 #### Annunciation Consolidated (event type 0xf010)
 
-_TODO:_
+Field Name                  | Data Type    | Size (octets) | Unit
+----------------------------|--------------|---------------|------
+Event Flags                 | 8 bit        | 1             | None
+Annunciation ID             | u16          | 2             | None
+Annunciation Type           | Enum of u16  | 2             | None
+Annunciation Status         | Enum of u8   | 1             | None
+Timestamp (AuxInfo1 + 2)    | u32          | 4             | None
+AuxInfo3                    | u16          | 2             | None
+AuxInfo4                    | u16          | 2             | None
+AuxInfo5                    | u16          | 2             | None
+AuxInfo6                    | u16          | 2             | None
+
+NOTE: The _Timestamp_ seems to be included in _all_ annunciations, regardless of _Annunciation Type_.
+
+The _Timestamp_ contains the number of seconds since 2000-01-01 00:00:00.
+
+Bits in the _Event Flags_ field are defined as follows:
+
+Bit | Definition       | Description
+----|------------------|-------------
+0   | AuxInfo1 Present | If this bit is set, field _AuxInfo1_ is present
+1   | AuxInfo2 Present | If this bit is set, field _AuxInfo2_ is present
+2   | AuxInfo3 Present | If this bit is set, field _AuxInfo3_ is present
+3   | AuxInfo4 Present | If this bit is set, field _AuxInfo4_ is present
+4   | AuxInfo5 Present | If this bit is set, field _AuxInfo5_ is present
+5   | AuxInfo6 Present | If this bit is set, field _AuxInfo6_ is present
+6   | Alert Silenced   |
+
+The following values are defined for field _Annunciation Status_:
+
+Value | Definition
+------|------------
+0x0f  | Undetermined
+0x33  | Pending
+0x3c  | Snoozed
+0x55  | Confirmed
+
+The following values are defined for field _Annunciation Type_ (list incomplete):
+
+Value  | Definition                   | Description
+-------|------------------------------|------------
+0xf007 | No Delivery                  | Insulin flow blocked
+0xf008 | Fault 8                      |
+0xf02b |                              | Pump error, delivery stopped, need to restart
+0xf033 | Bolus Stopped                |
+0xf03a |                              | Battery failure, insert new one
+0xf047 | Max Fill Reached             |
+0xf048 | Max Fill Reached 2           |
+0xf067 | Check Bolus BG Alert         |
+0xf069 | Low Reservoir Alert          |
+0xf06a | Low Reservoir Alert 2        |
+0xf06c | Personal Reminder            |
+0xf06d | Set Change Reminders         | Reminder to change the infusion set
+0xf075 | IOB Cleared Alert            | Pump's counter for "Insulin On Board" (active insulin) cleared
+0xf307 | Calibrate Now Alert          |
+0xf309 | Change Sensor 1              |
+0xf30a | Change Sensor 2              |
+0xf312 | No SG Calibration Occurred   |
+0xf315 | Change Sensor 3              |
+0xf321 | Sensor Error Alert           |
+0xf322 | Low SG PLGM Alert            | Low sensor glucose value
+0xf323 | Low SG Suspend Alert         | Low sensor glucose value, insulin delivery suspended since _X_
+0xf327 | Predictive Resume Alert      | Basal deliver resumed after suspend by sensor
+0xf329 | Threshold Suspend Alarm      | Insulin delivery suspended on low
+0xf32f | Manual Resume                | Basal resumed due to change of low settings
+0xf330 | High Sensor Glucose 2        | High sensor glucose value
+0xf333 | CL1 Exit High SG             | SmartGuard ended, blood glucose needed to restart it
+0xf334 | CL1 Exit Alert               | SmartGuard ended
+0xf335 | CL1 UMin Alert               | SmartGuard has been at minimum delivery for 2:30 h, blood glucose needed to continue in SmartGuard
+0xf336 | CL1 UMax Alert               | SmartGuard has been at maximum delivery for 4:00 h, blood glucose neede to continue in SmartGuard
+0xf33a | CL1 Off Alert                |
+0xf33b | Severe Low SG                |
+0xf341 | CL1 Bolus Recommended        |
+0xf345 | Calibration Recommended      |
+0xf34b | First Calibration Successful |
+0xf34c | Early Calibration            |
+0xf365 | Calibrate Reminder           |
+
+The meaning of fields _AuxInfo3–6_, if present at all, depends on the _Annunciation Type_. Types _not_ mentioned in the following listing are assumed to have none of these fields.
+
+![AuxInfo meaning depending on Annunciation Type](files/idd-annunciations.png)
+
+##### AuxInfo: Contextual Time
+
+AuxInfo | Field Name              | Data Type    | Size (octets) | Unit
+--------|-------------------------|--------------|---------------|------
+3       | Contextual Time Minutes | u8           | 1             | minutes
+3       | Contextual Time Hours   | u8           | 1             | hours
+
+Used for the following annunciation types:
+
+* 0xf312
+* 0xf327
+* 0xf32f
+* 0xf365
+
+##### AuxInfo: SG Value
+
+AuxInfo | Field Name              | Data Type    | Size (octets) | Unit
+--------|-------------------------|--------------|---------------|------
+3       | SG Value                | f16          | 2             | mg/dL
+
+Used for the following annunciation types:
+
+* 0xf322
+* 0xf329
+* 0xf330
+* 0xf33b
+
+##### AuxInfo: SG Value & Contextual Time
+
+AuxInfo | Field Name              | Data Type    | Size (octets) | Unit
+--------|-------------------------|--------------|---------------|------
+3       | SG Value                | f16          | 2             | mg/dL
+4       | Contextual Time Minutes | u8           | 1             | minutes
+4       | Contextual Time Hours   | u8           | 1             | hours
+
+Used for the following annunciation types:
+
+* 0xf323
+
+##### AuxInfo: Units Remaining
+
+AuxInfo | Field Name              | Data Type    | Size (octets) | Unit
+--------|-------------------------|--------------|---------------|------
+3–4     | Units Remaining         | f32          | 4             | IU
+
+Used for the following annunciation types:
+
+* 0xf069
+
+##### AuxInfo: Units Delivered
+
+AuxInfo | Field Name              | Data Type    | Size (octets) | Unit
+--------|-------------------------|--------------|---------------|------
+3–4     | Units Delivered         | f32          | 4             | IU
+
+Used for the following annunciation types:
+
+* 0xf047
+* 0xf048
+
+##### AuxInfo: Units Programmed & Units Delivered
+
+AuxInfo | Field Name              | Data Type    | Size (octets) | Unit
+--------|-------------------------|--------------|---------------|------
+3–4     | Units Programmed        | f32          | 4             | IU (?)
+5–6     | Units Delivered         | f32          | 4             | IU (?)
+
+Used for the following annunciation types:
+
+* 0xf033
+
+##### AuxInfo: SG Expiration Time
+
+AuxInfo | Field Name                 | Data Type | Size (octets) | Unit
+--------|----------------------------|-----------|---------------|------
+3       | SG Expiration Time Minutes | u8        | 1             | minutes
+3       | SG Expiration Time Hours   | u8        | 1             | hours
+
+Used for the following annunciation types:
+
+* 0xf345
+* 0xf34c
+
+##### AuxInfo: Calibration Times & SG Expiration Time
+
+AuxInfo | Field Name                           | Data Type | Size (octets) | Unit
+--------|--------------------------------------|-----------|---------------|------
+3       | Early Calibration Time Minutes       | u8        | 1             | minutes
+3       | Early Calibration Time Hours         | u8        | 1             | hours
+4       | Recommended Calibration Time Minutes | u8        | 1             | minutes
+4       | Recommended Calibration Time Hours   | u8        | 1             | hours
+5       | SG Expiration Time Minutes           | u8        | 1             | minutes
+5       | SG Expiration Time Hours             | u8        | 1             | hours
+
+Used for the following annunciation types:
+
+* 0xf34b
+
+##### AuxInfo: Delivery Suspended
+
+AuxInfo | Field Name              | Data Type    | Size (octets) | Unit
+--------|-------------------------|--------------|---------------|------
+3       | Delivery Suspended      | u8 (bool)    | 1             | None
+3       | (unused)                | None         | 1             | None
+
+Used for the following annunciation types:
+
+* 0xf335
+* 0xf336
+
+##### AuxInfo: Basal Pattern
+
+AuxInfo | Field Name              | Data Type | Size (octets) | Unit
+--------|-------------------------|-----------|---------------|------
+3       | Basal Pattern           | u8        | 1             | None
+3       | (unused)                | None      | 1             | None
+
+Used for the following annunciation types:
+
+* 0xf333
+* 0xf33a
+
+##### AuxInfo: Basal Pattern & Delivery Suspended
+
+AuxInfo | Field Name              | Data Type | Size (octets) | Unit
+--------|-------------------------|-----------|---------------|------
+3       | Basal Pattern           | u8        | 1             | None
+3       | (unused)                | None      | 1             | None
+4       | Delivery Suspended      | u8 (bool) | 1             | None
+4       | (unused)                | None      | 1             | None
+
+Used for the following annunciation types:
+
+* 0xf334
+
+##### AuxInfo: BG Value
+
+AuxInfo | Field Name              | Data Type | Size (octets) | Unit
+--------|-------------------------|-----------|---------------|------
+3       | BG Value                | u8        | 1             | kg/L
+
+Used for the following annunciation types:
+
+* 0xf341
+
+##### AuxInfo: Duration Since Last Bolus
+
+AuxInfo | Field Name                | Data Type | Size (octets) | Unit
+--------|---------------------------|-----------|---------------|------
+3       | Duration Since Last Bolus | u16       | 2             | minutes (?)
+
+Used for the following annunciation types:
+
+* 0xf067
+
+##### AuxInfo: Low Reservoir Time Remaining
+
+AuxInfo | Field Name              | Data Type | Size (octets) | Unit
+--------|-------------------------|-----------|---------------|------
+3       | Time Remaining Hours    | u8        | 1             | hours
+3       | Time Remaining Minutes  | u8        | 1             | minutes
+
+> [!NOTE]
+> The order of minutes and hours is switched, compared to other annunciations.
+
+Used for the following annunciation types:
+
+* 0xf06a
+
+##### AuxInfo: Time When IOB Cleared & IOB Partial Status Remaining Time
+
+AuxInfo | Field Name                           | Data Type | Size (octets) | Unit
+--------|--------------------------------------|-----------|---------------|------
+3       | Time When IOB Cleared Minutes        | u8        | 1             | minutes
+3       | Time When IOB Cleared Hours          | u8        | 1             | hours
+4       | IOB Partial Status Remaining Minutes | u8        | 1             | minutes
+4       | IOB Partial Status Remaining Hours   | u8        | 1             | hours
+
+Used for the following annunciation types:
+
+* 0xf075
+
+##### AuxInfo: Occlusion Type
+
+AuxInfo | Field Name              | Data Type  | Size (octets) | Unit
+--------|-------------------------|------------|---------------|------
+3       | Occlusion Type          | Enum of u8 | 1             | None
+3       | (unused)                | None       | 1             | None
+
+Used for the following annunciation types:
+
+* 0xf007
+
+##### AuxInfo: Reminder Name
+
+AuxInfo | Field Name              | Data Type | Size (octets) | Unit
+--------|-------------------------|-----------|---------------|------
+3       | Reminder Name           | u8        | 1             | None
+3       | (unused)                | None      | 1             | None
+
+Used for the following annunciation types:
+
+* 0xf06c
+
+##### AuxInfo: Days Since Set Change
+
+AuxInfo | Field Name              | Data Type | Size (octets) | Unit
+--------|-------------------------|-----------|---------------|------
+3       | Days Since Set Change   | u8        | 1             | days
+3       | (unused)                | None      | 1             | None
+
+Used for the following annunciation types:
+
+* 0xf06d
+
+##### AuxInfo: Calibration Type
+
+AuxInfo | Field Name              | Data Type  | Size (octets) | Unit
+--------|-------------------------|------------|---------------|------
+3       | Calibration Type        | Enum of u8 | 1             | None
+3       | (unused)                | None       | 1             | None
+
+Used for the following annunciation types:
+
+* 0xf307
+
+##### AuxInfo: Wait Duration
+
+AuxInfo | Field Name              | Data Type | Size (octets) | Unit
+--------|-------------------------|-----------|---------------|------
+3       | Wait Duration           | u8        | 1             | ???
+3       | (unused)                | None      | 1             | None
+
+Used for the following annunciation types:
+
+* 0xf321
 
 
 #### Max Auto Basal Rate Changed (event type 0xf01a)

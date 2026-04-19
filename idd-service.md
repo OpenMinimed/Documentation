@@ -747,7 +747,7 @@ Field Name                      | Data Type    | Size (octets) | Unit
 Flags                           | 8 bit        | 1             | None
 Basal Rate                      | f32          | 0 or 4        | IU/h (?)
 Insulin Delivery Stopped Reason | Enum of u8   | 0 or 1        | None
-TBR Type                        | Enum of u8   | 0 0r 1        | None
+TBR Type                        | Enum of u8   | 0 or 1        | None
 TBR Adjustment                  | f32          | 0 or 4        | IU/h (?)
 
 NOTE: TBR stands for "temporary basal rate".

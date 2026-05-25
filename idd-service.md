@@ -786,7 +786,7 @@ Value | Definition
 
 Field Name                  | Data Type    | Size (octets) | Unit
 ----------------------------|--------------|---------------|------
-Food Amount                 | f16          | 2             | g (?)
+Food Amount                 | f16          | 2             | g
 
 
 #### BG Reading (event type 0xf007)

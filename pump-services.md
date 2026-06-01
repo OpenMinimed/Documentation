@@ -119,7 +119,7 @@ UUID                                 | Name                                  | P
 0x2aac                               | CGM Specific Ops Control Point        | Write, Indicate | yes            |
 00000200-0000-1000-0000-009132591325 | CGM Measurement (Medtronic Extension) | Read            | ?              |
 00000201-0000-1000-0000-009132591325 | Sensor Connected State                | Read, Indicate  | ?              |
-00000202-0000-1000-0000-009132591325 | Sensor Expiration Time                | Indicate        | no             |
+00000202-0000-1000-0000-009132591325 | Time Of Sensor Expiration             | Indicate        | no             |
 00000203-0000-1000-0000-009132591325 | Sensor Calibration Time               | Indicate        | ?              |
 00000204-0000-1000-0000-009132591325 | Time Of Next Calibration Recommended  | Read, Indicate  | no             |
 00000205-0000-1000-0000-009132591325 | Algorithm Data                        | Read            | ?              |

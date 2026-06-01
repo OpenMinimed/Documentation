@@ -1,24 +1,19 @@
-# CGM service
+# Continuous Glucose Monitoring Service
 
 This service provides access to data from a CGM sensor (such as the Guardian 4) that is connected to the pump. Its core components is the _CGM Measurement_ characteristic which contains the actual sensor measurements. Configure notifications for this characteristic. The pump will then automatically send new CGM measurements as they come in from the sensor. Additionally, specific data records can be requested through the service's _Record Access Control Point_ characteristic and will also be delivered as notifications of the _CGM Measurement_ characteristic.
-
-* _CGM Specific Ops Control Point_
-	* app sends command to the pump
-	* pump sends back data in response (indications)
-	* SAKE-encrypted in _both_ directions
 
 
 ## CGM Feature
 
-This characteristic can be read to retrieve pump features regarding the CGM. Most notably the _E2E-CRC Supported_ bit. If it is set, the optional _E2E-CRC_ field in the other characteristics of this service must be included and populated with a CRC over the data. See [[CGMS, sec. 3.11]](#ref-cgms) for the specifics.
+This characteristic can be read to retrieve pump features regarding the CGM. Most notably the _E2E-CRC Supported_ bit. If it is set, the optional _E2E-CRC_ field in the other characteristics of this service must be included and populated with a CRC over the data. See [[CGMS, sec. 3.11]](#ref-cgms) for the specifics. Note that this goes both ways: The CRC must be included in all our requests, and the pump will also add it in its responses.
 
-The characteristic is based on the standard defined in [[CGMS]](#ref-cgms) and [[GSS, sec. 3.42]](#ref-gss). There are no additions or changes to the flags that make up the actual feature list, so we will not reproduce them here. But Medtronic's version leaves out the _CGM Type-Sample Location_ field as well as the mandatory _E2E-CRC_ field, i.e. the structure of this characteristic looks like this:
+The _E2E-CRC Supported_ bit seems to be always set for a 780G pump, which is why we explicitly mentiond it here.
 
-Field Name                   |  Data Type   | Size (octets) | Unit
------------------------------|--------------|---------------|------
-CGM Feature                  | 24 bit       | 3             | None
+The implementation follows the standard defined in [[CGMS]](#ref-cgms) and [[GSS, sec. 3.42]](#ref-gss) without any changes additions, so we will not reproduce that information here.
 
 Note that the data returned by the pump in this characteristic is _not_ SAKE-encrypted.
+
+The spec requires the _CGM Feature_ to be static during a connection. So reading it _once_ is sufficient. The features will not change in the middle of a connection.
 
 
 ## CGM Measurement
@@ -30,11 +25,36 @@ The implementation follows the standard defined in [[CGMS]](#ref-cgms) and [[GSS
 The data returned by the pump in this characteristic is SAKE-encrypted.
 
 
+## Session Start Time
+
+This characteristic provides the absolute time of the first CGM measurement taken. This serves as reference for the measurements reported in the _CGM Measurement_ characteristic which only contain a relative offset to this start time.
+
+The implementation follows the standard defined in [[CGMS]](#ref-cgms) and [[GSS, sec. 3.45]](#ref-gss) without any changes or additions, so we will not reproduce that information here.
+
+The data returned by the pump in this characteristic is SAKE-encrypted.
+
+
+## Session Run Time
+
+This characteristic provides the expected run time of the CGM session.
+
+The implementation follows the standard defined in [[CGMS]](#ref-cgms) and [[GSS, sec. 3.44]](#ref-gss) without any changes or additions, so we will not reproduce that information here.
+
+The data returned by the pump in this characteristic is **NOT** SAKE-encrypted.
+
+
+## CGM Status
+
+This characteristic reports the current status of the CGM sensor. It contains the same status bits as the _Sensor Status Annunciation_ field in the _CGM Measurement_ characteristic but does not require a running CGM session that is reporting measurements.
+
+The implementation follows the standard defined in [[CGMS]](#ref-cgms) and [[GSS, sec. 3.47]](#ref-gss) without any changes or additions, so we will not reproduce that information here.
+
+The data returned by the pump in this characteristic is SAKE-encrypted.
+
+
 ## CGM Specific Ops Control Point (SOCP)
 
 A command (identified by its _opcode_) is sent by writing to this characteristic. The pump responds by sending an indication for the same characteristic.
-
-If the _E2E-CRC Supported_ bit is set in the _CGM Features_ characteristic (which always seems to be the case for a 780G pump), the _E2E-CRC_ field must be included in all requests. The pump will also add this field in its responses.
 
 The written data must be SAKE-encrypted. The returned data is also SAKE-encrypted.
 
@@ -160,6 +180,22 @@ Bit | Definition                         | Description
 3   | Has Calibration Recommended        |
 4   | Has Abnormal SG Increase Detection |
 5   | Calibration Transfer Supported     |
+
+
+## Time Of Sensor Expiration
+
+Field Name                   | Data Type    | Size (octets) | Unit
+-----------------------------|--------------|---------------|------
+Value                        | u16          | 2             | minutes
+
+
+## Time Of Next Calibration Recommended
+
+Field Name                   | Data Type    | Size (octets) | Unit
+-----------------------------|--------------|---------------|------
+Timestamp                    | u32          | 4             | ???
+Clock ID                     | u32          | 4             | None
+Time Offset                  | u16          | 2             | ???
 
 
 ## References

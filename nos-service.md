@@ -1,4 +1,4 @@
-# NOS service
+# Network Operational State Service
 
 This custom Medtronic service deals with the _Network Operational State_. It contains only a single characteristic.
 

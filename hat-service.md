@@ -316,8 +316,8 @@ Field Name                  | Data Type    | Size (octets) | Unit
 ----------------------------|--------------|---------------|------
 Opcode                      | Value 0x0f   | 1             | None
 Session Metric ID           | Enum of u8   | 1             | None
-Compression Time            | u32          | 0 or 4        | ???
-Encryption Time             | u32          | 0 or 4        | ???
+Compression Time            | u32          | 0 or 4        | ms
+Encryption Time             | u32          | 0 or 4        | ms
 
 The following values are defined for the _Session Metric ID_ field:
 

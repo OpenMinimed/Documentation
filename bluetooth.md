@@ -6,11 +6,7 @@ Establishing an initial connection roughly works like this: The pump is instruct
 
 Both devices then exchange some keys (known as _pairing_ step) and store them for later use. Most importantly, this allows them to reestablish a lost connection without user interaction.
 
-The devices do NOT use _LE Secure Connection_, meaning the communication should be crackable and sniffable if we are able to sniff the pairing process (we can reconstruct the SAKE session key)
-
-The sensor can be easily connected with the provided [python script](/PythonConnector/). The pump is a bit different and it requires MITM protection. It still currently under investigation.
-
-The devices utilize standardized and custom GATT services and characteristics. The interesting data (as payload in specific characteristics) is encrypted using a Medtronic protocol called SAKE (Secure? Authenticated? Key Exchange?). The protocol uses two different GATT service UUIDs: <code>0xfe82</code> for pairing and the actual data transfer, <code>0xfe81</code> when advertising for reconnecting already paired phones.
+The devices utilize standardized and custom GATT services and characteristics. The interesting data (as payload in specific characteristics) is encrypted using a Medtronic protocol called SAKE (Secure? Authenticated? Key Exchange?).
 
 Please check out our overview of [pump's](pump-services.md) and [app's](app-services.md) GATT services as well as the [Bluetooth SIG's official specifications](https://www.bluetooth.com/specifications/specs/) for more information.
 
@@ -61,6 +57,4 @@ There seems to be no such relation between a pump's MAC address and its serial n
 
 ## Device names
 
-The mobile apps and the pumps use a pseudo device name on the GATT layer. The apps on first startup will generate a `Mobile xxxxxx` like string, where the number is always a random 6-digit number (**odd** on Android devices and **even** on iOS devices).
-
-Pumps use their serial numbers of the form `NGxxxxxxxH` and translate them into `Pump xxxxxxxH`, keeping the 7-digit number the same.
+Pumps use their serial numbers of the form `NGxxxxxxxH` and translate them into the device name `Pump xxxxxxxH`, keeping the 7-digit number the same.

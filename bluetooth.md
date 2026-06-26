@@ -15,6 +15,40 @@ The devices utilize standardized and custom GATT services and characteristics. T
 Please check out our overview of [pump's](pump-services.md) and [app's](app-services.md) GATT services as well as the [Bluetooth SIG's official specifications](https://www.bluetooth.com/specifications/specs/) for more information.
 
 
+## Advertising details
+
+### Initial pairing
+
+For the initial connection, the Peripheral must include the following data in its advertising packets:
+
+Data                       | Type | Value
+---------------------------|------|-------
+16-bit Service Class UUIDs | 0x03 | 0xfe82
+Device Name                | 0x09 | "Mobile xxxxxxx"
+
+This specific _Class UUID_ is Medtronic's custom SAKE service.
+
+The _Device Name_ must start with "Mobile " (note the whitespace) and can then be followed by 0 to 7 standard ASCII characters. This is the name the pump will display for confirmation. It serves no other purpose and can basically be random.
+
+
+### Reconnects
+
+If the pump and a paired Peripheral are disconnected (devices are too far apart, Bluetooth is temporarily disabled etc.), the pump tries to reconnect. It scans for a known Peripheral with the following data in its advertising packets:
+
+Data                       | Type | Value
+---------------------------|------|-------
+16-bit Service Class UUIDs | 0x03 | 0xfe81
+
+Note that this uses a _different_ UUID than the advertising for pairing. The pump ignores the device name, so there is no need to include it here.
+
+Since the pump does not know if the Peripheral is gone for long, it does not make sense for the pump to spend lots of its battery power on scanning for the Peripheral in short intervals. If the Peripheral's advertising packets are sent only every second or so, chances are high that the pump will miss them if it only scans for them every couple of seconds, too.
+
+> [!NOTE]
+> We do not know if the pump actually behaves that way (it is not trivial to measure when and how often the pump is actually scanning), but it would make sense for a battery-powered device.
+
+We can reliably get the pump to reconnect if we let the Peripheral send advertising packets every 150 ms (or faster). Advertising with much longer intervals would usually _not_ get the pump to reconnect.
+
+
 ## MAC addresses
 
 The sensor MACs start with DC:16:A2 (Medtronic Diabetes, https://standards-oui.ieee.org/oui/oui.txt), while the pump use the private OUI 00:23:f7. The lower 3 bytes are the sensor's serial number, converted to hexadecimal. For example:

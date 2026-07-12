@@ -10,10 +10,6 @@ Presumably due to the used BT protocol (see more [here](app-services.md)) SAKE c
 
 The key databases are static between devices and each device type / model. See the detailed description of the format and the actual keys [here](key_databases.md). 
 
-## Advertising
-
-TODO
-
 ## Initialization
 
 After a successful advertisement and subsequent BLE connection of a SAKE-compatible device the following steps are necessary to perform a successful handshake:

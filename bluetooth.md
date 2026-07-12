@@ -44,6 +44,9 @@ Since the pump does not know if the Peripheral is gone for long, it does not mak
 
 We can reliably get the pump to reconnect if we let the Peripheral send advertising packets every 150 ms (or faster). Advertising with much longer intervals would usually _not_ get the pump to reconnect.
 
+> [!IMPORTANT]
+> The pump seems to only reconnect to devices that are using a Resolvable Private Address (RPA). The initial pairing also works with public addresses though. So if you have trouble with reconnects, this is one of the things to check.
+
 
 ## MAC addresses
 

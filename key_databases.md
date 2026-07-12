@@ -44,14 +44,14 @@ Data is from the [SAKE reversing project](https://github.com/OpenMinimed/GhidraP
 ### Mobile Application (MinMed Mobile) <-> Insulin Pump
 
 <code>
-f75995e7 04 01 01 1bc1bf7cbf36fa1e2367d795ff09211903da6afbe986b650f14179c0e6852e0ce393781078ffc6f51919e2eaefbde69b8eca21e41ab59b881a0bea0286ea91dc7582a86a714e1737f558f0d66dc1895c
+f75995e7 04 01 01 1bc1bf7cbf36fa1e2367d795ff092119 03da6afbe986b650f14179c0e6852e0c e393781078ffc6f51919e2eaefbde69b 8eca21e41ab59b881a0bea0286ea91dc 7582a86a714e1737f558f0d66dc1895c
 </code>
 
 
 ### Primary Display (Guardian Mobile app) <-> Glucose Sensor
 
 <code>
-5fe59283 08 01 02 30f0b50df613f2e429c8c5e8713854add1a69b837235a3e974304d8055ccb397838b90823c73236d6a83dcc9db3a2a939ff16145ca4169ef93a7fa39b20962b05e57413bff8b3d61fce0dfef2c43b326
+5fe59283 08 01 02 30f0b50df613f2e429c8c5e8713854ad d1a69b837235a3e974304d8055ccb397 838b90823c73236d6a83dcc9db3a2a93 9ff16145ca4169ef93a7fa39b20962b0 5e57413bff8b3d61fce0dfef2c43b326
 </code>
 
 ### Probably a development key between  Mobile Application (MinMed Mobile) <-> Insulin Pump
@@ -60,5 +60,5 @@ Found hardcoded in MiniMed Mobile v1.2.1 (class com.medtronic.minimed.ngpsdk.con
 We could indentify this keydb in at least in 19 APKs, in the MiniMedMobile and Fota Updater apps (probably a branch of MMM).
 
 <code>
-c2cdfdd1 04 01 01 fce36ed66ef21def3b0763975494b239038ebe8606f79a9bf00d9f11b6db04c7c0434787cbf00d5476289c22288e2105ae40e01391837f9476fa5003895c5a1afe35662a2a6211826af016eebe30e4ba
+c2cdfdd1 04 01 01 fce36ed66ef21def3b0763975494b239 038ebe8606f79a9bf00d9f11b6db04c7 c0434787cbf00d5476289c22288e2105 ae40e01391837f9476fa5003895c5a1a fe35662a2a6211826af016eebe30e4ba
 </code>

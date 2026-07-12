@@ -2,117 +2,132 @@
 
 Medtronic uses a custom cryptographic protocol that is implemented over the GATT layer. The protocol consists of a handshake procedure which contains a common Session Key derivation and a Permit Exchange part. After the handshake has been completed, selected GATT traffic is sequenced, encrypted and signed using AES.
 
+
 ## Architecture
 
 Presumably due to the used BT protocol (see more [here](app-services.md)) SAKE consists of a server and a client part. The BT Peripheral is the server and the connecting Central is the client.
 
+
 ## Key databases
 
-The key databases are static between devices and each device type / model. See the detailed description of the format and the actual keys [here](key_databases.md). 
+The key databases are static between devices and each device type / model. See the detailed description of the format and the actual keys [here](key_databases.md).
+
 
 ## Initialization
 
-After a successful advertisement and subsequent BLE connection of a SAKE-compatible device the following steps are necessary to perform a successful handshake:
+After the successful BLE connection of a SAKE-compatible device, the following steps are necessary to perform a successful handshake:
 
-1. The connecting client will enable notifications on the SAKE characteristic.
-2. The server sends 20 zero bytes using BLE notification.
-3. The client responds with 20 zero bytes using BLE write characteristic messages. This will trigger the handshake procedure on both devices. 
-4. The client and server will exchange the remaining 6 messages defined by the protocol.
+1. The connecting client subscribes to the server's SAKE characteristic for notifications.
+2. The server sends 20 zero bytes as notification for this characteristic.
+3. The client responds by writing 20 zero bytes to this characteristic.
+
+This initialization will trigger the actual handshake procedure on both devices. Client and server then go on to exchange the remaining 6 messages defined by the protocol. This also uses the server's SAKE characteristic.
 
 
 ## Handshake procedure
 
-Note: all messages will be identified by their overall index in the whole process, followed by the sender's first character. So for example message <code>0_s</code> is the first message ever during pairing and it is sent by the server.
+> [!NOTE]
+> All messages will be identified by their overall index in the whole process, followed by the sender's first character. So for example message `0_s` is the first message ever during pairing and it is sent by the server.
 
-All handshake messages are 20 byte long. Random padding bytes are used if the actual content is smaller.
+All handshake messages are 20 bytes long. Random padding bytes are used if the actual content is shorter.
 
 If something goes wrong during the handshake, the protocol is implemented in a way where it will send random garbage, instead of nothing. This is presumably a security feature and als the other side can fail quicker instead of hanging on a timeout.
 
-## 0_s - server announcement
 
-This message just contains the device type of the server and probably some version flag.
+### 0_s – server announcement
 
-
-Byte index | Meaning
------------|------------
-0          | Server Device Type
-1          | Constant 0x1. Probably protocol version.
-
-## 1_c - client keys and type
-
-This message contains the randomly generated key material and nonce of the client. It also contains the client device type.
+This message just contains the server's device type and probably some version flag.
 
 Byte index | Meaning
 -----------|------------
-0-7        | Client key material
+0          | Server device type
+1          | Constant 0x01 (probably protocol version)
+
+
+### 1_c – client keys and type
+
+This message contains the client's randomly generated key material and nonce. It also contains the client device type.
+
+Byte index | Meaning
+-----------|------------
+0–7        | Client key material
 8          | Client device type
-9-12       | Client nonce
+9–12       | Client nonce
 
-## 2_s - server key and authentication
 
-This message is the first complex message. The server also generates its key material and nonce, just like the client and it will perform the key derivation, since it now know both the client's and its own key materials.
+### 2_s – server key and authentication
 
+This message is the first complex message. The server also generates its key material and nonce, randomly, just like the client. It will perform the key derivation, since it now knows both the client's and its own key material.
 
 Byte index | Meaning
 -----------|------------
-0-7        | Server authentication tag
-8-15       | Server key material
-16-19      | Server nonce
+ 0–7       | Server authentication tag
+ 8–15      | Server key material
+16–19      | Server nonce
 
-For the Auth tag calculation we have to use the following keys from the pre-shared Key Database:
-
-- <code>handshake_auth_key</code>: it is used to sign the merged keys 
-- <code>derivation_key</code>: this is appended to the server and client key material, just before signing
-
-
-The Auth tag will be calculated the following way:
+The server authentication tag is calculated as follows:
 
 ```
 server_tag = CMAC_AES_8(
-  key=handshake_auth_key, 
-  data=(server_key_material + client_key_material + derivation_key)
+  key = DB.handshake_auth_key,
+  msg = (server_key_material + client_key_material + DB.derivation_key)
 )
 ```
 
+It uses `handshake_auth_key` and `derivation_key` from the server's pre-shared key database.
 
-## 3_c - client key and authentication
 
-We now verify the the server's authentication message (<code>2_s</code>) and generate the client's.
+### 3_c – client key and authentication
+
+This message contains only the client's authentication tag which the server now uses to verify the authentication message.
 
 Byte index | Meaning
 -----------|------------
-0-7        | Client authentication tag
+0–7        | Client authentication tag
+
+The server verifies the authentication message by recomputing its authentication tag the same way the client did:
 
 ```
 client_tag = CMAC_AES_8(
-  key=handshake_auth_key, 
-  data=(server_tag + server_key_material + derivation_key)
+  key = DB.handshake_auth_key,
+  msg = (server_tag + server_key_material + DB.derivation_key)
 )
 ```
 
-## 4_s - server permit
+Verification is successful if the recomputed client tag is equal to the received one.
 
-Now, everything has been created in order to have an encrypted session on both sides. So all traffic from now on will be sequenced and encrypted. TODO: write more about SeqCrypt.
 
-This message is used to establish a "permit" on the remote side (client). It is a signed and encrypted blob that only the remote side can decrypt. Every key database has two keys for exactly this, the <code>permit_decrypt_key</code> and <code>permit_auth_key</code>.
+### 4_s – server permit
+
+Now, everything has been created in order to have an encrypted session on both sides. So all traffic from now on will be sequenced and SAKE-encrypted.
+
+_TODO: write more about SeqCrypt_
+
+This message is used to establish a "permit" on the remote side (client). It is a signed and encrypted blob that only the remote side can decrypt. Every key database has two keys for exactly this: the `permit_decrypt_key` and `permit_auth_key`.
 
 Byte index | Meaning
 -----------|------------
-0-15       | Session-encrypted permit
+0–15       | Session-encrypted permit
 
-The permit is padded with 1 random byte BEFORE session-level encryption. 
+The permit is padded with 1 random byte BEFORE session-level encryption.
 
-Session-encrypted permit = 12 bytes of data, 4 bytes of CMAC at the end.
+```
+Session-encrypted permit = (12 bytes of data) + (4 bytes of CMAC)
+```
 
-<code>permit_decrypt_key</code> can be used to decrypt a permit using AES ECB mode.
-CMAC is then verified using <code>permit_auth_key</code>.
+`permit_decrypt_key` can be used to decrypt a permit using AES ECB mode. CMAC is then verified using `permit_auth_key`.
 
-The decrypted permit format is currently not very well understood.  The first byte has to be 0x00, the second has to equal to the remote sides' (prover) device type.
+The decrypted permit format is currently not very well understood.  The first byte has to be 0x00, the second has to equal the remote side's (prover) device type.
 
-TODO: improve this
-TODO: 5_c
 
-> [!WARNING]  
+### 5_c
+
+_TODO: document this_
+
+
+---
+
+> [!WARNING]
 > This is a lazy AI autogenerated documentation from now! dont look at it!
 
 ## Overview

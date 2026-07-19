@@ -28,6 +28,8 @@ Value | Definition
 0x08  | Get Firmware Authority
 0x09  | Set Firmware Authority
 
+The data requested by the _Get X_ requests is returned in the _Certificate Management Data_ characteristic as [GATT streams](gatt-streaming.md).
+
 > [!NOTE]
 > The _Set X_ requests likely pass their data in the _Certificate Management Data_ characteristic. This still needs to be carefully tested and documented properly.
 

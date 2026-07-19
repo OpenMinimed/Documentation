@@ -12,6 +12,7 @@ This is a collection of mostly reverse-engineering notes that will (hopefully) e
 
 * [Bluetooth communication](bluetooth.md)
 * [Data types and notational conventions](gatt-data-conventions.md)
+* [GATT Streaming](gatt-streaming.md)
 * [App GATT services](app-services.md)
 * [Pump GATT services](pump-services.md)
     * [Certificate Management Service](cm-service.md)

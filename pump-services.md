@@ -95,8 +95,7 @@ This is the standard GATT service as defined by the Bluetooth SIG, containing on
 
 UUID   | Name                       | Properties   | SAKE-encrypted | Notes
 -------|----------------------------|--------------|----------------|-------
-0x2a19 | Battery Level              | Read, Notify | no             |
-
+0x2a19 | Battery Level              | Read, Notify | no             | Only in 25 % increments (on 780G)
 
 ## Continuous Glucose Monitoring
 

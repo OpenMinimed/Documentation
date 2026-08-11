@@ -71,6 +71,10 @@ E2E-CRC                     | u16          | 0 or 2        | N/A
 
 See the spec for values of fields _Therapy Control State_, _Operational State_, _Flags_.
 
+Notes on _Operational State_ from a 780G: During a reservoir change, Operational State
+goes Preparing -> Priming -> Waiting while Therapy Control State is Stop (not Pause) and
+the Reservoir Attached flag goes high when we start priming.
+
 Bits in the _Sensor Connectivity State_ field are defined as follows:
 
 Bit | Definition                        | Description

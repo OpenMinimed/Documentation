@@ -30,6 +30,9 @@ Value | Definition
 
 The data requested by the _Get X_ requests is returned in the _Certificate Management Data_ characteristic as [GATT streams](gatt-streaming.md).
 
+> [!INFO]
+> The pump takes quite a bit of setup time before sending its initial response to a _Get X_ request. Usually 30–50 seconds, depending on the command. Subsequent chunks are delivered faster, usually 3–4 seconds after our acknowledgement/request. Set your timeouts accordingly.
+
 > [!NOTE]
 > The _Set X_ requests likely pass their data in the _Certificate Management Data_ characteristic. This still needs to be carefully tested and documented properly.
 

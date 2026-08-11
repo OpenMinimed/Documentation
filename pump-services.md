@@ -201,8 +201,8 @@ A Medtronic custom service.
 
 UUID                                 | Name                                 | Properties                 | SAKE-encrypted | Notes
 -------------------------------------|--------------------------------------|----------------------------|----------------|-------
-00000601-0000-1000-0000-009132591325 | Certificate Management Control Point | Write, Indicate            | ?              |
-00000602-0000-1000-0000-009132591325 | Certificate Management Data          | Write w/o response, Notify | ?              |
+00000601-0000-1000-0000-009132591325 | Certificate Management Control Point | Write, Indicate            | no             |
+00000602-0000-1000-0000-009132591325 | Certificate Management Data          | Write w/o response, Notify | no             |
 
 
 ## Firmware Update

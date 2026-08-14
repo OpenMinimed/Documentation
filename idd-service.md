@@ -133,7 +133,7 @@ Bit   | Definition                               | Description
 16    | Therapy Algorithm State                  | custom extension
 17    | Insulin On Board                         | custom extension
 18    | New CGM Measurement                      | custom extension
-19    | Sensor EOL                               | custom extension
+19    | Sensor EOL                               | custom extension; Sometimes follows bit 18 regardless of sensor health, possibly misleading name
 20    | CGM Calibration                          | custom extension
 21    | Sensor Status Message                    | custom extension
 22    | Sensor Connectivity State                | custom extension

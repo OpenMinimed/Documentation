@@ -100,8 +100,6 @@ Value | Definition
 0x0d  | Waiting Warm-up
 0x0e  | No Paired Sensor
 
-780G / Guardian 4 sensor change sequence: _No Message_, _Sensor Connectivity State_ 0x07, and pump in Safe Basal when transmitter is charging. _Warm-up_ and _Sensor Connectivity State_ 0x03 after connecting the new sensor. Directly to live readings after warm-up.
-
 
 ## IDD Status Changed
 
@@ -135,7 +133,7 @@ Bit   | Definition                               | Description
 16    | Therapy Algorithm State                  | custom extension
 17    | Insulin On Board                         | custom extension
 18    | New CGM Measurement                      | custom extension
-19    | Sensor EOL                               | custom extension; 780G sets this on every _New CGM Measurement_ indication, so name seems wrong or bit is repurposed
+19    | Sensor EOL                               | custom extension; Sometimes follows bit 18 regardless of sensor health, possibly misleading name
 20    | CGM Calibration                          | custom extension
 21    | Sensor Status Message                    | custom extension
 22    | Sensor Connectivity State                | custom extension
@@ -150,8 +148,6 @@ Bit   | Definition                               | Description
 31    | Extended Status 1                        | custom extension; If this bit is set, two additional octets are attached (bits 32–47).
 32    | Sensor Calibration Status Icon Changed   | custom extension
 33    | Early Sensor Calibration Time Changed    | custom extension
-
-A 780G / Guardian 4 sensor change sequence showed bits 22 (as the transmitter reconnected), 21, 20, 26, and 27 in that order. Bits 25 and 30 did not appear, even with the status reset after every indication.
 
 
 ## IDD Status Reader Control Point

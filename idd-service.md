@@ -71,10 +71,6 @@ E2E-CRC                     | u16          | 0 or 2        | N/A
 
 See the spec for values of fields _Therapy Control State_, _Operational State_, _Flags_.
 
-Notes on _Operational State_ from a 780G: During a reservoir change, Operational State
-goes Preparing -> Priming -> Waiting while Therapy Control State is Stop (not Pause) and
-the Reservoir Attached flag goes high when we start priming.
-
 Bits in the _Sensor Connectivity State_ field are defined as follows:
 
 Bit | Definition                        | Description
@@ -103,6 +99,12 @@ Value | Definition
 0x0c  | Sensor Connected
 0x0d  | Waiting Warm-up
 0x0e  | No Paired Sensor
+
+Infusion set change sequence  (_Therapy Control State_, _Operational State_, reservoir flag):
+1. Normal operation (0x55, 0x96, true)
+2. Rewinding / reservoir out (0x33, 0x66, false)
+3. Priming (0x33, 0x5a, true)
+4. Normal operation (0x55, 0x96, true)
 
 
 ## IDD Status Changed

@@ -100,6 +100,12 @@ Value | Definition
 0x0d  | Waiting Warm-up
 0x0e  | No Paired Sensor
 
+Infusion set change sequence  (_Therapy Control State_, _Operational State_, reservoir flag):
+1. Normal operation (0x55, 0x96, true)
+2. Rewinding / reservoir out (0x33, 0x66, false)
+3. Priming (0x33, 0x5a, true)
+4. Normal operation (0x55, 0x96, true)
+
 
 ## IDD Status Changed
 

@@ -478,7 +478,7 @@ In practice we observe a 780G pump sending notifications of the Command Data eve
 
 ### Opcodes
 
-The spec defines a large table of opcodes encoding different commands [[IDS, table 4.3.6]](#ref-ids). Some portions of the value range are marked as "prohibited". Medtronic uses on of these for custom opcodes. We only list the selection of opcodes defined in the MiniMed Mobile app. The pump may actually support other commands from the spec, too.
+The spec defines a large table of opcodes encoding different commands [[IDS, table 4.36]](#ref-ids). Some portions of the value range are marked as "prohibited". Medtronic uses on of these for custom opcodes. We only list the selection of opcodes defined in the MiniMed Mobile app. The pump may actually support other commands from the spec, too.
 
 Value  | Definition                        | Description
 -------|-----------------------------------|-------------

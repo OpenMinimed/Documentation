@@ -970,7 +970,7 @@ Value  | Definition                   | Description
 0xf333 | CL1 Exit High SG             | SmartGuard ended, blood glucose needed to restart it
 0xf334 | CL1 Exit Alert               | SmartGuard ended
 0xf335 | CL1 UMin Alert               | SmartGuard has been at minimum delivery for 2:30 h, blood glucose needed to continue in SmartGuard
-0xf336 | CL1 UMax Alert               | SmartGuard has been at maximum delivery for 4:00 h, blood glucose neede to continue in SmartGuard
+0xf336 | CL1 UMax Alert               | SmartGuard has been at maximum delivery for 4:00 h, blood glucose needed to continue in SmartGuard
 0xf33a | CL1 Off Alert                |
 0xf33b | Severe Low SG                |
 0xf341 | CL1 Bolus Recommended        |

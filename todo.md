@@ -73,3 +73,4 @@
 - [ ] IDD
 - [ ] research commands to clear alarms and warnings
     - the standard IDS defines _Snooze Annunciation_ (0x0f69) and _Confirm Annunciation_ (0x0f99) on the _IDD Command Control Point_. MiniMed Mobile 2.5.0 never sends them, so pump support is untested, see [IDD service](idd-service.md#standard-opcodes-not-used-by-the-app)
+    - 2026-09-28: every write to the _Command Control Point_ after SAKE alone is rejected with ATT 0x08 Insufficient Authorization, so support is still unknown; next step is the [Secure Control Point](idd-service.md#secure-control-point) public key exchange, see [IDD service](idd-service.md#observed-the-command-control-point-needs-authorization)

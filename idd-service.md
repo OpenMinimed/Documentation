@@ -592,6 +592,17 @@ The _Instance ID_ can be taken from the _IDD Annunciation Status_ characteristic
 
 The MiniMed Mobile app itself has no way to dismiss a pump alarm: `IddAnnunciationStatusChar` is read/notify only (its write type is `Void`) and the only reset is _Reset Status_ (0x030c) on the _IDD Status Reader Control Point_ which clears _IDD Status Changed_ flags, not annunciations.
 
+#### Observed: the Command Control Point needs authorization
+
+Tested on a 780G (MMT-1885, firmware 8.12.2) on 2026-09-28 from the on-watch client in [OpenMinimed/PebbleOS](https://github.com/OpenMinimed/PebbleOS), commit [`f712dda72`](https://github.com/OpenMinimed/PebbleOS/commit/f712dda72) (`src/fw/services/minimed/minimed_session.c`, "Snooze/Confirm Annunciation probe"). After a completed SAKE handshake:
+
+* Enabling notifications on _IDD Command Data_ and indications on _IDD Command Control Point_ succeeds.
+* Writing _Snooze Annunciation_ (`69 0f ff ff`) and _Confirm Annunciation_ (`99 0f ff ff`), SAKE-encrypted exactly like the working _IDD Status Reader Control Point_ requests, is rejected at the ATT layer with error **0x08 Insufficient Authorization**. No _Response Code_ indication follows.
+
+The instance ID 0xffff was chosen so that a pump implementing the opcodes would answer _Procedure not applicable_ (0x74) without touching a real annunciation. The ATT rejection comes before the pump looks at the opcode, so this does **not** tell whether Snooze/Confirm are implemented: every write to the _Command Control Point_ is refused on a link that has only done SAKE. That is the characteristic _Set Bolus_ goes through, so the gate is plausibly the extra authorization MiniMed Mobile performs through the [Secure Control Point](#secure-control-point) (public key exchange) before it can bolus. Untested.
+
+The same session read _IDD Annunciation Status_ (0x0103) successfully as a 1-byte plaintext value (flags only, bit 0 clear: no annunciation present), consistent with the pump showing no alarm at the time.
+
 ### Format of _Set Bolus_ command and _Set Bolus Response_
 
 The app packs only two commands: _Set Bolus_ (0x114b) and _Get High/Low SG Settings_. The other opcodes of its enum (_Cancel Bolus_, _Get Max Bolus Amount_) are never encoded by the app.

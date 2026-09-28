@@ -42,3 +42,10 @@ For example, bits 1, 2, 4 are set in byte `0x16`:
            |       |
     0x16 = 0001 0110
 
+
+
+## Units and E2E protection
+
+* Glucose values that are transported as kg/L (for example the BG value of the _CL1 Bolus Recommended_ annunciation) must be multiplied by 100000 to get mg/dL. (MiniMed Mobile: `TypeConversionUtilities.convertKgLToMgDl`.)
+* The _E2E-CRC_ fields are 16-bit CRCs as in the IDS/CGMS specs (CRC-CCITT, computed over the protected octets that precede it, including the E2E-Counter where one exists). The 780G advertises E2E protection for CGM characteristics but not for IDS (see the feature characteristics).
+* Field format codes seen in the app's converters: u8 (0x11), u16 (0x12), u32 (0x14), s8 (0x21), s16 (0x22), s32 (0x24), f16/SFLOAT (0x32), f32/FLOAT (0x34). These are the Android `BluetoothGattCharacteristic.FORMAT_*` values.

@@ -150,6 +150,70 @@ Bit   | Definition                               | Description
 33    | Early Sensor Calibration Time Changed    | custom extension
 
 
+## IDD Annunciation Status
+
+Characteristic `00000103-…`, SAKE-encrypted, read only in the MiniMed Mobile app (the app's characteristic type has no write payload). It is based on [[IDS, sec. 3.4]](#ref-ids) and reports **only one annunciation**, the one currently shown by the pump. There is no list of instance IDs, so a client that wants all of them must use the _Annunciation Consolidated_ / _Annunciation Cleared_ history events instead.
+
+Source: MiniMed Mobile 2.5.0 (`PumpAnnunciationConverter`, `BasePumpAnnunciationConverter`). All offsets in octets.
+
+Offset | Field                    | Data Type  | Notes
+-------|--------------------------|------------|------
+0      | Flags                    | 8 bit      | see below
+1      | Annunciation Instance ID | u16        |
+3      | Annunciation Type        | u16        | low 12 bits (`& 0x0fff`) are the type, top nibble is ignored. Type 0 means "no annunciation"
+5      | Annunciation Status      | Enum of u8 | 0x0f Undetermined, 0x33 Pending, 0x3c Snoozed, 0x55 Confirmed
+6      | AuxInfo 1                | 2 octets   | together with AuxInfo 2: Timestamp, u32, seconds since 2000-01-01 00:00:00 (mandatory; the app rejects an annunciation without it)
+8      | AuxInfo 2                | 2 octets   |
+10     | AuxInfo 3                | 2 octets   | meaning depends on the type
+12     | AuxInfo 4                | 2 octets   |
+14     | AuxInfo 5                | 2 octets   |
+16     | AuxInfo 6                | 2 octets   |
+end    | E2E-Counter, E2E-CRC     | u8, u16    | only if _E2E-Protection Supported_ is set
+
+The payload ends after the highest AuxInfo field whose flag is set (total 8, 10, 12, 14, 16 or 18 octets, plus E2E fields); if no AuxInfo flag is set the payload is 6 octets.
+
+Bits in _Flags_ (different from the history event flags below, which lack bit 0 and are shifted down by one):
+
+Bit | Definition
+----|-----------
+0   | Annunciation Present (if clear, there is no annunciation)
+1–6 | AuxInfo 1–6 present
+7   | Alert Silenced
+
+The AuxInfo 3–6 area holds type-specific values. The following table lists what the app parses (type in decimal and hex; "@N" is the offset; u8 pairs are minutes first, then hours; f16/f32 as described in [conventions](gatt-data-conventions.md)):
+
+Type (dec / hex) | Meaning (from the app / PythonPumpConnector) | Auxiliary data
+-----------------|---------------------------------------------|---------------
+7 / 0x007   | No Delivery                    | @10 Occlusion Type u8
+8 / 0x008   | "Fault 8"                      | @10 boolean option u8 (1 = true)
+51 / 0x033  | Bolus Stopped                  | @10 Programmed Amount f32, @14 Delivered Amount f32
+71, 72 / 0x047, 0x048 | Max Fill Reached     | @10 Delivered Amount f32
+103 / 0x067 | Check Bolus BG                 | @10 Minutes since last bolus u16
+105 / 0x069 | Low Reservoir                  | @10 Units Remaining f32
+106 / 0x06a | Low Reservoir (time based)     | @10 time remaining, 2 x u8 (order not verified)
+108 / 0x06c | Personal Reminder              | @10 Reminder Name u8
+109 / 0x06d | Set Change Reminder            | @10 Days since set change u8
+117 / 0x075 | IOB Cleared                    | @10 Time when IOB cleared (min, hr); @12 Time until IOB partial status is active (min, hr)
+775 / 0x307 | Calibrate Now                  | @10 Calibration Type u8
+777, 778, 789 / 0x309, 0x30a, 0x315 | Change Sensor | @10 Sensor is disposable u8
+786 / 0x312, 807 / 0x327, 815 / 0x32f, 869 / 0x365 | No SG Calibration Occurred, Predictive Resume, Manual Resume, Calibrate Reminder | @10 Contextual time (min, hr)
+801 / 0x321 | Sensor Error                   | @10 Wait Duration u8
+802 / 0x322 | Low SG (PLGM)                  | @10 SG f16
+803 / 0x323 | Low SG Suspend                 | @10 SG f16, @12 Contextual time (min, hr)
+809 / 0x329 | Threshold Suspend              | @10 SG f16
+816 / 0x330 | High SG                        | @10 SG f16
+819 / 0x333 | CL1 Exit High SG               | @10 Basal Pattern u8
+820 / 0x334 | CL1 Exit                       | @10 Basal Pattern u8, @12 Delivery Suspended u8
+821, 822 / 0x335, 0x336 | CL1 Umin / Umax    | @10 Delivery Suspended u8
+826 / 0x33a | CL1 Off                        | @10 Basal Pattern u8
+827 / 0x33b | Severe Low SG                  | @10 SG f16, @12 Severe Low SG limit u8
+833 / 0x341 | CL1 Bolus Recommended          | @10 BG f16 in kg/L (multiply by 100000 for mg/dL)
+837 / 0x345 | Calibration Recommended        | @10 SG expiration time (min, hr)
+843 / 0x34b | First Calibration Successful   | @10 Early calibration time (min, hr), @12 Recommended calibration time (min, hr), @14 SG expiration time (min, hr)
+844 / 0x34c | Early Calibration              | @10 SG expiration time (min, hr)
+
+Types not in this table are still valid; the app then just shows the timestamp. The table is only what the app decodes. Names for the remaining types are in PythonPumpConnector (`AnnunciationType`).
+
 ## IDD Status Reader Control Point
 
 This characteristic is based on the homonymous characteristic defined in [[IDS, sec. 4.5]](#ref-ids). Write a command to it (encoded by an _opcode_) to retrieve status information such as currently running boluses. The responses are sent as indications for the same characteristic. Such an indication also confirms the end of the command's execution.
@@ -185,6 +249,21 @@ Medtronic also slightly modifies some of the commands and responses defined in t
     - 4-byte floats instead of 2-byte floats for field _Bolus Fast Amount_
     - 4-byte floats instead of 2-byte floats for field _Bolus Extended Amount_
 
+
+### Operands of _Reset Status_ and _Get Active Bolus Delivery_
+
+The app sends these two commands with an operand (all others have none):
+
+_Reset Status_ (0x030c): the operand is the set of _IDD Status Changed_ flags to clear, sent as 2 octets, or 4 octets if any flag above bit 15 is set. The app then also sets bit 15 (_Extended Status_) as the continuation marker and clears it otherwise. So the operand has the same encoding as the _Flags_ field of _IDD Status Changed_.
+
+_Get Active Bolus Delivery_ (0x0356 for the request as defined in the app's enum):
+
+Field Name            | Data Type    | Size (octets)
+----------------------|--------------|--------------
+Bolus ID              | u16          | 2
+Bolus Value Selection | Enum of u8   | 1
+
+Bolus Value Selection: 0x0f Programmed, 0x33 Remaining, 0x3c Delivered.
 
 ### Format of modified standard _Get Insulin On Board Response_
 
@@ -513,6 +592,40 @@ The _Instance ID_ can be taken from the _IDD Annunciation Status_ characteristic
 
 The MiniMed Mobile app itself has no way to dismiss a pump alarm: `IddAnnunciationStatusChar` is read/notify only (its write type is `Void`) and the only reset is _Reset Status_ (0x030c) on the _IDD Status Reader Control Point_ which clears _IDD Status Changed_ flags, not annunciations.
 
+### Format of _Set Bolus_ command and _Set Bolus Response_
+
+The app packs only two commands: _Set Bolus_ (0x114b) and _Get High/Low SG Settings_. The other opcodes of its enum (_Cancel Bolus_, _Get Max Bolus Amount_) are never encoded by the app.
+
+Operand of _Set Bolus_ (all fields little-endian):
+
+Field Name                | Data Type    | Size (octets) | Unit
+--------------------------|--------------|---------------|------
+Opcode                    | Value 0x114b | 2             | None
+Flags                     | 8 bit        | 1             | None
+Bolus Type                | Enum of u8   | 1             | None
+Bolus Fast Amount         | f16          | 2             | IU
+Bolus Extended Amount     | f16          | 2             | IU
+Bolus Duration            | u16          | 2             | min
+Bolus Delay Time          | u16          | 0 or 2        | min, only if flag bit 0
+Bolus Template Number     | u8           | 0 or 1        | None, only if flag bit 1
+Bolus Activation Type     | Enum of u8   | 0 or 1        | None, only if flag bit 2
+E2E-Counter               | u8           | 0 or 1        | N/A
+E2E-CRC                   | u16          | 0 or 2        | N/A
+
+Flags: bit 0 Bolus Delay Time present, bit 1 Bolus Template Number present, bit 2 Bolus Activation Type present, bit 3 Delivery Reason Correction, bit 4 Delivery Reason Meal.
+Bolus Type: 0x0f Undetermined, 0x33 Fast, 0x3c Extended, 0x55 Multiwave.
+
+The pump answers with _Set Bolus Response_ (opcode 0x1177) followed by _Response Code_:
+
+Field Name                | Data Type    | Size (octets) | Unit
+--------------------------|--------------|---------------|------
+Response Opcode           | Value 0x1177 | 2             | None
+Bolus ID                  | u16          | 2             | None
+E2E-Counter               | u8           | 0 or 1        | N/A
+E2E-CRC                   | u16          | 0 or 2        | N/A
+
+Response Code Values as returned by the app's enum: 0x0f Success, 0x70 Opcode not supported, 0x71 Invalid Operand, 0x72 Procedure not completed, 0x73 Parameter out of range, 0x74 Procedure not applicable, 0x75 Plausibility check failed, 0x76 Maximum bolus number reached.
+
 ### Format of _Response Code_ response
 
 This is a special response. The pump sends it as indication on the _IDD Command Control Point_ characteristic to mark the end of command execution (i.e. expect no more responses on the _IDD Command Data_ characteristic) and also to provide a final return code in the _Response Code Value_ field. The original opcode that started the command is included in the _Request Opcode_ field.
@@ -708,6 +821,50 @@ Contrary to [[IDS, table 3.22]](#ref-ids), Medtronic not only allows an operand 
     <td>Sequence Number (?)</td>
 </tr>
 </table>
+
+### RACP frames
+
+All fields little-endian. The app never sends anything but the ops below (_Report Stored Records_ 0x33, _Delete Stored Records_ 0x3c, _Abort Operation_ 0x55, _Report Number of Stored Records_ 0x5a).
+
+Request:
+
+Field Name        | Data Type    | Size (octets)
+------------------|--------------|--------------
+Opcode            | u8           | 1
+Operator          | Enum of u8   | 1
+Filter Type       | Enum of u8   | 0 or 1
+Minimum           | u32          | 0 or 4
+Maximum           | u32          | 0 or 4
+
+Operator: 0x0f Null, 0x33 All records, 0x3c Less than or equal, 0x55 Greater than or equal, 0x5a Within range, 0x66 First record, 0x69 Last record. If the operator is _Null_ no filter fields follow. _Minimum_ is present for _Greater or equal_ and _Within range_, _Maximum_ for _Less or equal_ and _Within range_.
+Filter Type: 0x0f Sequence Number, 0x33 Sequence Number (reference time events), 0x3c Sequence Number (non-reference-time events).
+
+Response (indication):
+
+Field Name              | Data Type    | Size (octets)
+------------------------|--------------|--------------
+Opcode                  | u8           | 1
+Operator                | Enum of u8   | 1
+Number of Records       | u16          | 2 (opcode 0x66 _Number of Stored Records Response_)
+Request Opcode          | u8           | 1 (opcode 0x0f _Response Code_)
+Response Code Value     | Enum of u8   | 1 (opcode 0x0f _Response Code_)
+E2E-Counter, E2E-CRC    | u8, u16      | 0 or 3
+
+Response Code Value: 0xf0 Success, 0x02 Opcode not supported, 0x03 Invalid operator, 0x04 Operator not supported, 0x05 Invalid operand, 0x06 No records found, 0x07 Abort unsuccessful, 0x08 Procedure not completed, 0x09 Operand not supported.
+
+### IDD History Data frame
+
+Each notification of _IDD History Data_ carries one record:
+
+Field Name          | Data Type    | Size (octets) | Unit
+--------------------|--------------|---------------|------
+Event Type          | u16          | 2             | None
+Sequence Number     | u32          | 4             | None
+Relative Offset     | u16          | 2             | s (time since reference time event)
+Event Data          | bytes        | variable      | see below
+E2E-CRC             | u16          | 0 or 2        | N/A
+
+With E2E-protection the last two octets are the CRC over all preceding bytes of the record. (How the E2E-Counter is laid out inside the event data was not verified.)
 
 ### Format of History Data
 

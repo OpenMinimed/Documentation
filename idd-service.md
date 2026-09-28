@@ -494,6 +494,25 @@ Value  | Definition                        | Description
 
 The opcodes that contain "response" in the name are used only in responses, the other ones only when sending commands.
 
+#### Standard opcodes NOT used by the app
+
+The following opcodes come from the standard IDS [[IDS, sec. 4.6.1]](#ref-ids) but are never sent by MiniMed Mobile 2.5.0 (the app's enum has only the nine opcodes above), so it is **unknown whether the pump implements them**. Probing them on a pump should answer either the normal response or _Response Code: Opcode not supported_ (0x70).
+
+Value  | Definition                     | Operand
+-------|--------------------------------|--------
+0x0f5a | Set Therapy Control State      | see spec
+0x0f66 | Set Flight Mode                | none
+0x0f69 | Snooze Annunciation            | Annunciation Instance ID (u16)
+0x0f96 | Snooze Annunciation Response   | Annunciation Instance ID (u16)
+0x0f99 | Confirm Annunciation           | Annunciation Instance ID (u16)
+0x0fa5 | Confirm Annunciation Response  | Annunciation Instance ID (u16)
+
+Per [[IDS, sec. 3.7.2.5]](#ref-ids), a _Confirm Annunciation_ makes the server stop reporting the annunciation in the _IDD Annunciation Status_ characteristic, set the _Annunciation Status Changed_ flag in _IDD Status Changed_ and then indicate the response. _Snooze Annunciation_ (sec. 3.7.2.4) sets the status to _Snoozed_ (0x3c) for an implementation-specific time and back to _Pending_ (0x33) afterwards. An unknown or already confirmed instance ID yields _Response Code: Procedure not applicable_ (0x74).
+
+The _Instance ID_ can be taken from the _IDD Annunciation Status_ characteristic or from the _Annunciation Consolidated_ history event (see below). The Annunciation Status values are: 0x0f Undetermined, 0x33 Pending, 0x3c Snoozed, 0x55 Confirmed.
+
+The MiniMed Mobile app itself has no way to dismiss a pump alarm: `IddAnnunciationStatusChar` is read/notify only (its write type is `Void`) and the only reset is _Reset Status_ (0x030c) on the _IDD Status Reader Control Point_ which clears _IDD Status Changed_ flags, not annunciations.
+
 ### Format of _Response Code_ response
 
 This is a special response. The pump sends it as indication on the _IDD Command Control Point_ characteristic to mark the end of command execution (i.e. expect no more responses on the _IDD Command Data_ characteristic) and also to provide a final return code in the _Response Code Value_ field. The original opcode that started the command is included in the _Request Opcode_ field.
@@ -901,7 +920,20 @@ Instance ID                 | u16          | 2             | None
 
 #### Annunciation Consolidated (event type 0xf010)
 
-_TODO:_
+Layout follows the _IDD Annunciation Status_ characteristic ([[IDS, sec. 3.4]](#ref-ids)) with a sixth auxiliary info field added by Medtronic. Source: PythonPumpConnector (`history/events/annunciation.py`).
+
+Field Name                  | Data Type    | Size (octets) | Unit
+----------------------------|--------------|---------------|------
+Flags                       | 8 bit        | 1             | None
+Annunciation Instance ID    | u16          | 2             | None
+Annunciation Type           | u16          | 2             | None
+Annunciation Status         | Enum of u8   | 1             | None
+Timestamp                   | u32          | 4             | seconds since 2000-01-01 00:00:00
+Auxiliary data              | depends on type | 0–8        |
+
+Bits in _Flags_: 0–5 _AuxInfo 1–6 present_, 6 _Alert silenced_. AuxInfo 1 and 2 are always set (the timestamp occupies them). Only the low 12 bits of _Annunciation Type_ are the actual type; the top nibble is always 0xf. Status is 0x0f Undetermined, 0x33 Pending, 0x3c Snoozed, 0x55 Confirmed.
+
+The layout of the auxiliary data depends on the type, e.g. a time (u8 minutes, u8 hours), an SG value (f16), or a reservoir/bolus amount (f32). See PythonPumpConnector for the known types.
 
 
 #### Max Auto Basal Rate Changed (event type 0xf01a)
@@ -910,6 +942,33 @@ Field Name              | Data Type    | Size (octets) | Unit
 ------------------------|--------------|---------------|------
 Old Rate                | f32          | 4             | IU/h (?)
 New Rate                | f32          | 4             | IU/h (?)
+
+
+## Secure Control Point
+
+Characteristic `00000109-0000-1000-0000-009132591325`. It does not exist in the standard IDS and is not part of the SAKE handshake. MiniMed Mobile 2.5.0 (`p299pd.InterfaceC8937a` "SecureControlChar", `od.C8718d` "PublicKeyExchangeApiImpl") accesses it as a SAKE-encrypted characteristic and uses it to hand a **public key** to the pump. The GATT properties were not verified; the app sends requests and waits for a response with a 30 second timeout, so it is presumably Write + Indicate.
+
+All fields are little-endian.
+
+### Send Data (request)
+
+Field       | Data Type  | Size (octets) | Unit
+------------|------------|---------------|------
+Opcode      | u8 (0x01)  | 1             | None
+Exchange ID | u16        | 2             | None
+Key Data    | bytes      | remainder     | None
+
+The app increments _Exchange ID_ with each request, starting at 1.
+
+### Confirm Data (response)
+
+Field       | Data Type  | Size (octets) | Unit
+------------|------------|---------------|------
+Opcode      | u8 (0x02)  | 1             | None
+Exchange ID | u16        | 2             | None
+Status      | u8         | 1             | None
+
+_Exchange ID_ must match the request. Status is 0x00 _Valid key data_ or 0x01 _Invalid key data_ (the app reports "Key data is rejected by pump").
 
 
 ## GST Battery Level

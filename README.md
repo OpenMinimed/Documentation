@@ -19,6 +19,8 @@ This is a collection of mostly reverse-engineering notes that will (hopefully) e
     * [History And Trace Service](hat-service.md)
     * [Insulin Delivery Service](idd-service.md)
     * [Network Operational State Service](nos-service.md)
+    * [Secure Session Establishment Service](sse-service.md)
+    * [Firmware Update Service](fwu-service.md)
 
 
 ## SAKE encryption

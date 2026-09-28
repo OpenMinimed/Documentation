@@ -12,7 +12,13 @@ The key databases are static between devices and each device type / model. See t
 
 ## Advertising
 
-TODO
+Observed in MiniMed Mobile 2.5.0 (`ge.C6639x2.getAdvertisingData`). The app advertises (as Peripheral) with:
+
+* one 16-bit service UUID: `0xFE82` when pairing, `0xFE81` when reconnecting an already paired pump,
+* manufacturer specific data with company ID 505 (`0x01f9`, Medtronic): the first payload byte is `0x00` when pairing and `0x80` when reconnecting, followed by the device identifier string (the app's pseudo device name, see [Bluetooth communication](bluetooth.md)),
+* the TX power level.
+
+Advertising uses low-latency mode and high TX power.
 
 ## Initialization
 

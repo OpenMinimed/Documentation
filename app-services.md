@@ -77,3 +77,11 @@ UUID                                 | Name      | Properties    | SAKE-encrypte
 
 App and pump use this for their initial handshake/key exchange which is used to establish Medtronic's proprietary SAKE-encrypted communication. Several pump services then use this to send encrypted data to the app.
 
+
+
+## Server-side details (MiniMed Mobile 2.5.0)
+
+* _Device Information_ (`00000900-…`): all characteristics are created with property _Read_ and permission _Read_. The nine characteristics are `0x2a23`, `0x2a24`, `0x2a25`, `0x2a26`, `0x2a27`, `0x2a28`, `0x2a29`, `0x2a2a`, `0x2a50`.
+* _SAKE Port_ (`0000fe82-0000-1000-0000-009132591325` inside service `0xfe82`): properties _Write, Notify_ (0x18), permission _Write_ (0x10).
+* The app registers only these two custom/DIS services plus the standard GAP/GATT ones; it does not host the CGM/IDS services itself.
+* Advertising: see [SAKE advertising](sake.md#advertising).

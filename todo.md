@@ -72,3 +72,4 @@
 - [ ] CGM (low, high, before low/high)
 - [ ] IDD
 - [ ] research commands to clear alarms and warnings
+    - the standard IDS defines _Snooze Annunciation_ (0x0f69) and _Confirm Annunciation_ (0x0f99) on the _IDD Command Control Point_. MiniMed Mobile 2.5.0 never sends them, so pump support is untested, see [IDD service](idd-service.md#standard-opcodes-not-used-by-the-app)

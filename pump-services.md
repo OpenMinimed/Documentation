@@ -65,6 +65,7 @@ UUID                                 | Name                                  | P
 00000107-0000-1000-0000-009132591325 | IDD Command Data                      | Notify          | yes            |
 0x2a52                               | Record Access Control Point           | Write, Indicate | no             |
 00000108-0000-1000-0000-009132591325 | IDD History Data                      | Notify          | yes            |
+00000109-0000-1000-0000-009132591325 | Secure Control Point                  | ?               | yes            | Used by the app for the public key exchange, see [IDD service](idd-service.md#secure-control-point)
 00000400-0000-1000-0000-009132591325 | GST Battery Level                     | Read, Notify    | no             |
 
 
@@ -124,6 +125,8 @@ UUID                                 | Name                                  | P
 00000204-0000-1000-0000-009132591325 | Time Of Next Calibration Recommended  | Read, Indicate  | no             |
 00000205-0000-1000-0000-009132591325 | Algorithm Data                        | Read            | ?              |
 
+MiniMed Mobile 2.5.0 only uses `0x0202` and `0x0204` of the Medtronic extension characteristics. `0x0200`, `0x0201`, `0x0203` and `0x0205` (and the whole `0x1020` service) are not referenced by the app, and the SAKE column above is therefore not verified for them. In the app, `0x2a52`, `0x0202` and `0x0204` are **not** SAKE-encrypted; `0x2aa7`, `0x2aa9`, `0x2aaa` and `0x2aac` are.
+
 
 ## History and Trace
 
@@ -175,6 +178,8 @@ UUID                                 | Name                          | Propertie
 
 ## Secure Session Establishment
 
+See [Secure Session Establishment Service](sse-service.md).
+
 UUID                                 | Type            | Notes
 -------------------------------------|-----------------|-------
 00000700-0000-1000-0000-009132591325 | Primary Service |
@@ -191,6 +196,8 @@ UUID                                 | Name              | Properties           
 
 ## Certificate Management
 
+See [Certificate Management Service](cm-service.md).
+
 UUID                                 | Type            | Notes
 -------------------------------------|-----------------|-------
 00000600-0000-1000-0000-009132591325 | Primary Service |
@@ -206,6 +213,8 @@ UUID                                 | Name                                 | Pr
 
 
 ## Firmware Update
+
+See [Firmware Update Service](fwu-service.md).
 
 UUID                                 | Type            | Notes
 -------------------------------------|-----------------|-------

@@ -11,7 +11,10 @@ The devices utilize standardized and custom GATT services and characteristics. T
 Please check out our overview of [pump's](pump-services.md) and [app's](app-services.md) GATT services as well as the [Bluetooth SIG's official specifications](https://www.bluetooth.com/specifications/specs/) for more information.
 
 
-## Advertising details
+## Advertising details (mobile device)
+
+This is the advertising and connection mode used by mobile devices such as smartphones running Medtronic's MiniMed Mobile app.
+
 
 ### Initial pairing
 
@@ -46,6 +49,69 @@ We can reliably get the pump to reconnect if we let the Peripheral send advertis
 
 > [!IMPORTANT]
 > The pump seems to only reconnect to devices that are using a Resolvable Private Address (RPA). The initial pairing also works with public addresses though. So if you have trouble with reconnects, this is one of the things to check.
+
+
+## Advertising details (CareLink device)
+
+This is the advertising and connection mode used by Medtronic's _CareLink Uploader_ in combination with their _Blue Adapter_ (a USB-BLE dongle). It requires the user to input their pump's 6-digit confirmation code on the computer that is trying to connect to the pump.
+
+When told by the user to connect to a CareLink device, the pump scans for Peripherals with the following data in their advertising packets:
+
+Data                       | Type | Value
+---------------------------|------|-------
+16-bit Service Class UUIDs | 0x03 | 0xfe82
+Device Name                | 0x09 | "PC"
+
+To actually get a connection going, the Peripheral also has to answer a following Scan Request from the pump with very specific advertising data in its Scan Response:
+
+```
+Length:     12
+Type:       0xff   (Manufacturer Specific)
+Company ID: 0x01f9 (Medtronic Inc.)
+Data:       9-byte hash
+```
+
+If any of this is wrong, the pump will not even try to connect.
+
+> [!IMPORTANT]
+> In this mode, the pump will only connect to devices that _do not_ use a Resolvable Private Address (RPA).
+
+That hash is computed from the pump's 6-digit confirmation code and the BLE adapter's MAC address as follows:
+
+1. Concat MAC address and confirmation code into an array of 8-bytes. This drops the MAC's uppermost nibble! Use Big-Endian byte order for MAC address and confirmation code.
+
+    ```
+    MAC bytes:  aA bB cC dD eE fF  (6 bytes          → 48 bits)
+    code bytes: _G hH iI           (6 integer digits → 20 bits)
+
+    -> Ab Bc Cd De Ef FG hH iI
+    ```
+
+2. Reverse the order of that array.
+
+3. Compute the 64-bit [FNV-1 hash](https://en.wikipedia.org/wiki/Fowler%E2%80%93Noll%E2%80%93Vo_hash_function) of that array.
+
+    ```
+    offset_basis = 0xcbf29ce484222325
+    FNV_prime    = 0x100000001b3
+    ```
+
+4. Byte-reverse the order of the hash.
+
+5. Prepend byte `0x01` to the hash.
+
+### Example hash computation
+
+```
+MAC address:       01:23:45:67:89:ab → 01 23 45 67 89 ab
+Confirmation code: "215087" → 215087 (0x3482f) → 03 48 2f
+
+1. concat:  12 34 56 78 9a b3 48 2f
+2. reverse: 2f 48 b3 9a 78 56 34 12
+3. FNV-1:   32 10 ac 9f 6d 44 f0 4b
+4. reverse: 4b f0 44 6d 9f ac 10 32
+5. prepend: 01 4b f0 44 6d 9f ac 10 32
+```
 
 
 ## MAC addresses

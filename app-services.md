@@ -46,6 +46,9 @@ UUID                                 | Type            | Notes
 
 This seems to be based on the _Device Information Service_ (DIS, UUID 0x180a) defined by the Bluetooth SIG and which, interestingly, _the pump_ also uses. It is not clear why Medtronic decided to go with a custom UUID here instead.
 
+> [!IMPORTANT]
+> When connecting as _CareLink device_, the Peripheral must provide this service with the default UUID 0x180a instead.
+
 ### Service characteristics
 
 UUID   | Name                       | Properties | SAKE-encrypted | Notes

@@ -859,6 +859,9 @@ NOTE: The _ISIG_ field probably encodes the raw glucose sensor values. Older pum
 
 NOTE: The _ISIG_ value reported by the pump is displayed by CareLink with an additional scale factor of 0.01, e.g. the raw value 1023 is displayed as 10.23.
 
+> [!IMPORTANT]
+> The _Time Offset_ is the (relative) timestamp of the actual measurement. Since these events can also be reported as part of a backfill (if, for instance, the connection between pump and sensor was previously interrupted for half an hour), you must no use the event's _Relative Offset_ to place the sensor measurement at the correct time because that field would only contain the timestamp of the backfill.
+
 The _SG Value_ can have the following special values that must not be interpreted as regular sensor measurements:
 
 Value  | Definition

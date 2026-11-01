@@ -868,6 +868,7 @@ Value  | Definition
 -------|------------
 0x0301 | Sensor is starting
 0x0303 | Sensor is updating
+0x0308 | SG Value is above 400 mg/dL
 0x030d | SG Value is below 50 mg/dL
 
 
